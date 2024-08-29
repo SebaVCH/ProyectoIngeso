@@ -35,6 +35,11 @@ func RegistrarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if len(usuario.ContrasenaHash) < 8 {
+		http.Error(w, "La contraseña debe tener al menos 8 caracteres", http.StatusBadRequest)
+		return
+	}
+	
 	// Cifrar la contraseña
 	hash, err := utils.HashContrasena(usuario.ContrasenaHash)
 	if err != nil {

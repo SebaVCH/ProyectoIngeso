@@ -12,7 +12,10 @@ func main() {
 	http.HandleFunc("/iniciar-sesion", handlers.IniciarSesion)
 
 	log.Println("Iniciando servidor en :8080...")
-	if err := http.ListenAndServe(":8080", nil); err != nil {
+
+	var err = http.ListenAndServe(":8080", nil)
+	if err != nil {
 		log.Fatalf("No se pudo iniciar el servidor: %s\n", err)
 	}
+
 }
