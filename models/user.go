@@ -7,6 +7,8 @@ import (
 // Estructura que representa un usuario en la base de datos
 type Usuario struct {
 	gorm.Model
-	CorreoElectronico string `gorm:"uniqueIndex"`
-	ContrasenaHash    string
+	NombreYapellido   string `json:"nameLastName"`
+	NombreUsuario     string `gorm:"uniqueIndex" json:"username"`
+	CorreoElectronico string `gorm:"uniqueIndex" json:"mail"`
+	Contrasena        string `json:"password"`
 }

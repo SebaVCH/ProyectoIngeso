@@ -8,8 +8,8 @@ import (
 
 func main() {
 	// Asocia las rutas /registro y /iniciar-sesion a las funciones correspondientes
-	http.HandleFunc("/registro", handlers.RegistrarUsuario)
-	http.HandleFunc("/iniciar-sesion", handlers.IniciarSesion)
+	http.HandleFunc("/register", handlers.RegistrarUsuario)
+	http.HandleFunc("/login", handlers.IniciarSesion)
 
 	log.Println("Iniciando servidor en :8080...")
 

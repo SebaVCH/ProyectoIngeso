@@ -35,18 +35,18 @@ func RegistrarUsuario(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if len(usuario.ContrasenaHash) < 8 {
+	if len(usuario.Contrasena) < 8 {
 		http.Error(w, "La contraseña debe tener al menos 8 caracteres", http.StatusBadRequest)
 		return
 	}
-	
+
 	// Cifrar la contraseña
-	hash, err := utils.HashContrasena(usuario.ContrasenaHash)
+	hash, err := utils.HashContrasena(usuario.Contrasena)
 	if err != nil {
 		http.Error(w, "Error al cifrar la contraseña", http.StatusInternalServerError)
 		return
 	}
-	usuario.ContrasenaHash = hash
+	usuario.Contrasena = hash
 
 	// Guardar el usuario en la base de datos
 	if err := bd.Create(&usuario).Error; err != nil {
@@ -66,8 +66,8 @@ func IniciarSesion(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var datosEntrada struct {
-		CorreoElectronico string `json:"correo_electronico"`
-		Contrasena        string `json:"contrasena"`
+		Identificador string `json:"identificador"`
+		Contrasena    string `json:"Contrasena"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&datosEntrada); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -75,12 +75,12 @@ func IniciarSesion(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var usuario models.Usuario
-	if err := bd.Where("correo_electronico = ?", datosEntrada.CorreoElectronico).First(&usuario).Error; err != nil {
+	if err := bd.Where("correo_electronico = ? OR nombre_usuario = ?", datosEntrada.Identificador, datosEntrada.Identificador).First(&usuario).Error; err != nil {
 		http.Error(w, "Usuario no encontrado", http.StatusUnauthorized)
 		return
 	}
 
-	if !utils.VerificarHashContrasena(datosEntrada.Contrasena, usuario.ContrasenaHash) {
+	if !utils.VerificarHashContrasena(datosEntrada.Contrasena, usuario.Contrasena) {
 		http.Error(w, "Contraseña inválida", http.StatusUnauthorized)
 		return
 	}
