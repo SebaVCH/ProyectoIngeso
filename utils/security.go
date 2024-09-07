@@ -6,7 +6,6 @@ import (
 
 // HashContrasena cifra la contraseña usando bcrypt.
 func HashContrasena(contrasena string) (string, error) {
-
 	//Costo = iteraciones para crear un hash
 	bytes, err := bcrypt.GenerateFromPassword([]byte(contrasena), bcrypt.DefaultCost)
 	return string(bytes), err
