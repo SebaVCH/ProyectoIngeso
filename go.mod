@@ -19,6 +19,7 @@ require (
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	github.com/rs/cors v1.11.1 // indirect
 	github.com/sosodev/duration v1.3.1 // indirect
 	golang.org/x/text v0.17.0 // indirect
 )
