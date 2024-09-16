@@ -9,8 +9,12 @@ type Usuario {
 type Mutation {
     registerUsuario(nameLastName: String!, username: String!, email: String!, password: String!): Usuario
     loginUsuario(identificador: String!, password: String!): String
+    actualizarUsername(username: String!, newUsername: String!): Usuario
+    actualizarPassword(username: String!, oldPassword: String!, newPassword: String!): String
 }
 
 type Query {
     getUsuario(id: ID!): Usuario
 }
+
+
