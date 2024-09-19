@@ -1,9 +1,19 @@
 type Usuario {
-    id: ID!
-    nameLastName: String
-    username: String
-    email: String
-    role: String
+    userID: String!
+    nameLastName: String!
+    username: String!
+    email: String!
+    password: String!
+    role: String!
+}
+
+type Curso {
+    courseID: ID!
+    instructorID: String!
+    title: String!
+    description: String!
+    price: Float!
+    category: String!
 }
 
 type Mutation {
@@ -11,10 +21,13 @@ type Mutation {
     loginUsuario(identificador: String!, password: String!): String
     actualizarUsername(username: String!, newUsername: String!): Usuario
     actualizarPassword(username: String!, oldPassword: String!, newPassword: String!): String
+    addCurso(courseID: String!, instructorID: String!, title: String!, description: String!, price: Float!, category: String!): Curso!
 }
 
 type Query {
     getUsuario(id: ID!): Usuario
+    userByUsername(username: String!): Usuario
+    courseByID(courseID: String!): Curso
 }
 
 

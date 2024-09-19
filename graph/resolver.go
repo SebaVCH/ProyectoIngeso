@@ -1,10 +1,13 @@
 package graph
 
 import (
+	"ProyectoIngeso/graph/model"
 	"ProyectoIngeso/models"
 	"ProyectoIngeso/utils"
 	"context"
 	"errors"
+	"fmt"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -108,4 +111,29 @@ func (r *Resolver) UpdatePassword(ctx context.Context, username string, oldPassw
 	}
 
 	return "Contraseña actualizada exitosamente", nil
+}
+
+func (r *queryResolver) UsuarioByUsername(ctx context.Context, username string) (*model.Usuario, error) {
+	var usuario model.Usuario
+
+	// Buscar el usuario por nombre de usuario en la base de datos
+	if err := r.DB.Where("username = ?", username).First(&usuario).Error; err != nil {
+		return nil, fmt.Errorf("usuario no encontrado: %v", err)
+	}
+
+	return &usuario, nil
+}
+
+func (r *queryResolver) CursoByID(ctx context.Context, courseID string) (*model.Curso, error) {
+	var course model.Curso
+	// Buscar el curso por ID en la base de datos
+	if err := r.DB.Where("course_id = ?", courseID).First(&course).Error; err != nil {
+		return nil, fmt.Errorf("curso no encontrado")
+	}
+
+	return &course, nil
+}
+
+func generateUniqueID() string {
+	return uuid.NewString()
 }

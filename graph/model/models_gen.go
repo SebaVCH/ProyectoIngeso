@@ -2,6 +2,15 @@
 
 package model
 
+type Curso struct {
+	CourseID     string  `json:"courseID"`
+	InstructorID string  `json:"instructorID"`
+	Title        string  `json:"title"`
+	Description  string  `json:"description"`
+	Price        float64 `json:"price"`
+	Category     string  `json:"category"`
+}
+
 type Mutation struct {
 }
 
@@ -9,9 +18,10 @@ type Query struct {
 }
 
 type Usuario struct {
-	ID           string  `json:"id"`
-	NameLastName *string `json:"nameLastName,omitempty"`
-	Username     *string `json:"username,omitempty"`
-	Email        *string `json:"email,omitempty"`
-	Role         *string `json:"role,omitempty"`
+	UserID       string `json:"userID"`
+	NameLastName string `json:"nameLastName"`
+	Username     string `json:"username"`
+	Email        string `json:"email"`
+	Password     string `json:"password"`
+	Role         string `json:"role"`
 }

@@ -1,11 +1,11 @@
 module ProyectoIngeso
 
-go 1.22.0
+go 1.22.5
 
 toolchain go1.23.0
 
 require (
-	github.com/99designs/gqlgen v0.17.49
+	github.com/99designs/gqlgen v0.17.53
 	github.com/google/uuid v1.6.0
 	github.com/rs/cors v1.11.1
 	github.com/vektah/gqlparser/v2 v2.5.16
@@ -23,6 +23,5 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.22 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
 	github.com/sosodev/duration v1.3.1 // indirect
-	golang.org/x/net v0.29.0 // indirect
 	golang.org/x/text v0.18.0 // indirect
 )
