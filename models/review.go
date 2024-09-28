@@ -7,6 +7,5 @@ type Reseña struct {
 	Rating   int    `json:"rating"`
 	Comments string `json:"comments"`
 
-	User  Usuario `gorm:"foreignKey:UserID"`
-	Curso Curso   `gorm:"foreignKey:CourseID"`
+	User Usuario `gorm:"foreignKey:UserID"`
 }

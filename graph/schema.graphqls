@@ -7,27 +7,26 @@ type Usuario {
     role: String!
 }
 
-type Curso {
-    courseID: ID!
-    instructorID: String!
-    title: String!
-    description: String!
-    price: Float!
-    category: String!
+type Carrito {
+    cartID: String!
+    userID: String!
+    courseID: String!
+    quantity: Int!
 }
+
 
 type Mutation {
     registerUsuario(nameLastName: String!, username: String!, email: String!, password: String!): Usuario
     loginUsuario(identificador: String!, password: String!): String
     actualizarUsername(username: String!, newUsername: String!): Usuario
     actualizarPassword(username: String!, oldPassword: String!, newPassword: String!): String
-    addCurso(courseID: String!, instructorID: String!, title: String!, description: String!, price: Float!, category: String!): Curso!
+    addToCart(username: String!, courseID: String!, quantity: Int!): Carrito
+    removeFromCart(username: String!, courseID: String!): Boolean
 }
 
 type Query {
     getUsuario(id: ID!): Usuario
     userByUsername(username: String!): Usuario
-    courseByID(courseID: String!): Curso
 }
 
 

@@ -4,11 +4,15 @@ import (
 	"ProyectoIngeso/graph/model"
 	"ProyectoIngeso/models"
 	"ProyectoIngeso/utils"
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
+	"net/http"
+	"time"
 )
 
 type Resolver struct {
@@ -113,6 +117,116 @@ func (r *Resolver) UpdatePassword(ctx context.Context, username string, oldPassw
 	return "Contraseña actualizada exitosamente", nil
 }
 
+// AddToCart agrega un curso al carrito del usuario.
+func (r *Resolver) AddToCart(ctx context.Context, username string, courseID string, quantity int) (*model.Carrito, error) {
+	// Verificar si el usuario existe y obtener el userID.
+	userID, err := r.checkUserExists(username)
+	if err != nil {
+		return nil, fmt.Errorf("error al verificar el usuario: %v", err)
+	}
+
+	// Verificar si el curso existe en el servicio de cursos.
+	courseExists, err := r.checkCourseExists(courseID)
+	if err != nil {
+		return nil, fmt.Errorf("error al verificar el curso: %v", err)
+	}
+	if !courseExists {
+		return nil, fmt.Errorf("curso con ID %s no encontrado", courseID)
+	}
+
+	// Crear un nuevo elemento en el carrito.
+	cartItem := &model.Carrito{
+		CartID:   uuid.New().String(),
+		UserID:   userID, // Asegúrate de que esta variable no esté vacía.
+		CourseID: courseID,
+		Quantity: quantity,
+	}
+
+	// Verificar si el campo UserID no está vacío.
+	if cartItem.UserID == "" {
+		return nil, fmt.Errorf("userID no puede estar vacío")
+	}
+
+	// Guardar el elemento en la base de datos.
+	if err := r.DB.Create(cartItem).Error; err != nil {
+		return nil, err
+	}
+
+	return cartItem, nil
+}
+
+// RemoveFromCart elimina un curso del carrito del usuario.
+func (r *Resolver) RemoveFromCart(ctx context.Context, username string, courseID string) (*bool, error) {
+	// Verificar si el usuario existe y obtener su userID.
+	userID, err := r.checkUserExists(username)
+	if err != nil {
+		return nil, fmt.Errorf("error al verificar el usuario: %v", err)
+	}
+
+	// Verificar si el curso existe en el servicio de cursos.
+	courseExists, err := r.checkCourseExists(courseID)
+	if err != nil {
+		return nil, fmt.Errorf("error al verificar el curso: %v", err)
+	}
+	if !courseExists {
+		return nil, fmt.Errorf("curso con ID %s no encontrado", courseID)
+	}
+
+	// Eliminar el curso del carrito del usuario usando el userID.
+	if err := r.DB.Where("userID = ? AND courseID = ?", userID, courseID).Delete(&model.Carrito{}).Error; err != nil {
+		return nil, err
+	}
+
+	success := true
+	return &success, nil
+}
+
+// checkUserExists verifica si un usuario existe en la base de datos y devuelve su userID.
+func (r *Resolver) checkUserExists(username string) (string, error) {
+	var usuario model.Usuario
+	if err := r.DB.Where("username = ?", username).First(&usuario).Error; err != nil {
+		return "", fmt.Errorf("usuario no encontrado")
+	}
+	return usuario.UserID, nil
+}
+
+// checkCourseExists verifica si un curso existe en el servicio de cursos.
+func (r *Resolver) checkCourseExists(courseID string) (bool, error) {
+	url := "http://localhost:8081/graphql" // Asegúrate de que esta URL sea correcta.
+	query := fmt.Sprintf(`{"query": "query { cursoByID(courseID: \"%s\") { courseID } }"}`, courseID)
+
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(query)))
+	if err != nil {
+		return false, err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	client := &http.Client{Timeout: 5 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return false, fmt.Errorf("error al verificar el curso, código de respuesta: %d", resp.StatusCode)
+	}
+
+	var result map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return false, err
+	}
+
+	// Verificar si la respuesta contiene el curso.
+	if data, found := result["data"].(map[string]interface{}); found {
+		if course, exists := data["cursoByID"].(map[string]interface{}); exists && course["courseID"] != nil {
+			return true, nil
+		}
+	}
+
+	return false, nil
+}
+
 func (r *queryResolver) UsuarioByUsername(ctx context.Context, username string) (*model.Usuario, error) {
 	var usuario model.Usuario
 
@@ -122,16 +236,6 @@ func (r *queryResolver) UsuarioByUsername(ctx context.Context, username string) 
 	}
 
 	return &usuario, nil
-}
-
-func (r *queryResolver) CursoByID(ctx context.Context, courseID string) (*model.Curso, error) {
-	var course model.Curso
-	// Buscar el curso por ID en la base de datos
-	if err := r.DB.Where("course_id = ?", courseID).First(&course).Error; err != nil {
-		return nil, fmt.Errorf("curso no encontrado")
-	}
-
-	return &course, nil
 }
 
 func generateUniqueID() string {

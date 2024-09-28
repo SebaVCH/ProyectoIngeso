@@ -2,13 +2,11 @@
 
 package model
 
-type Curso struct {
-	CourseID     string  `json:"courseID"`
-	InstructorID string  `json:"instructorID"`
-	Title        string  `json:"title"`
-	Description  string  `json:"description"`
-	Price        float64 `json:"price"`
-	Category     string  `json:"category"`
+type Carrito struct {
+	CartID   string `json:"cartID"`
+	UserID   string `json:"userID"`
+	CourseID string `json:"courseID"`
+	Quantity int    `json:"quantity"`
 }
 
 type Mutation struct {

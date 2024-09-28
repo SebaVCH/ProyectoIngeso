@@ -47,25 +47,23 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
-	Curso struct {
-		Category     func(childComplexity int) int
-		CourseID     func(childComplexity int) int
-		Description  func(childComplexity int) int
-		InstructorID func(childComplexity int) int
-		Price        func(childComplexity int) int
-		Title        func(childComplexity int) int
+	Carrito struct {
+		CartID   func(childComplexity int) int
+		CourseID func(childComplexity int) int
+		Quantity func(childComplexity int) int
+		UserID   func(childComplexity int) int
 	}
 
 	Mutation struct {
 		ActualizarPassword func(childComplexity int, username string, oldPassword string, newPassword string) int
 		ActualizarUsername func(childComplexity int, username string, newUsername string) int
-		AddCurso           func(childComplexity int, courseID string, instructorID string, title string, description string, price float64, category string) int
+		AddToCart          func(childComplexity int, username string, courseID string, quantity int) int
 		LoginUsuario       func(childComplexity int, identificador string, password string) int
 		RegisterUsuario    func(childComplexity int, nameLastName string, username string, email string, password string) int
+		RemoveFromCart     func(childComplexity int, username string, courseID string) int
 	}
 
 	Query struct {
-		CourseByID     func(childComplexity int, courseID string) int
 		GetUsuario     func(childComplexity int, id string) int
 		UserByUsername func(childComplexity int, username string) int
 	}
@@ -85,12 +83,12 @@ type MutationResolver interface {
 	LoginUsuario(ctx context.Context, identificador string, password string) (*string, error)
 	ActualizarUsername(ctx context.Context, username string, newUsername string) (*model.Usuario, error)
 	ActualizarPassword(ctx context.Context, username string, oldPassword string, newPassword string) (*string, error)
-	AddCurso(ctx context.Context, courseID string, instructorID string, title string, description string, price float64, category string) (*model.Curso, error)
+	AddToCart(ctx context.Context, username string, courseID string, quantity int) (*model.Carrito, error)
+	RemoveFromCart(ctx context.Context, username string, courseID string) (*bool, error)
 }
 type QueryResolver interface {
 	GetUsuario(ctx context.Context, id string) (*model.Usuario, error)
 	UserByUsername(ctx context.Context, username string) (*model.Usuario, error)
-	CourseByID(ctx context.Context, courseID string) (*model.Curso, error)
 }
 
 type executableSchema struct {
@@ -112,47 +110,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Curso.category":
-		if e.complexity.Curso.Category == nil {
+	case "Carrito.cartID":
+		if e.complexity.Carrito.CartID == nil {
 			break
 		}
 
-		return e.complexity.Curso.Category(childComplexity), true
+		return e.complexity.Carrito.CartID(childComplexity), true
 
-	case "Curso.courseID":
-		if e.complexity.Curso.CourseID == nil {
+	case "Carrito.courseID":
+		if e.complexity.Carrito.CourseID == nil {
 			break
 		}
 
-		return e.complexity.Curso.CourseID(childComplexity), true
+		return e.complexity.Carrito.CourseID(childComplexity), true
 
-	case "Curso.description":
-		if e.complexity.Curso.Description == nil {
+	case "Carrito.quantity":
+		if e.complexity.Carrito.Quantity == nil {
 			break
 		}
 
-		return e.complexity.Curso.Description(childComplexity), true
+		return e.complexity.Carrito.Quantity(childComplexity), true
 
-	case "Curso.instructorID":
-		if e.complexity.Curso.InstructorID == nil {
+	case "Carrito.userID":
+		if e.complexity.Carrito.UserID == nil {
 			break
 		}
 
-		return e.complexity.Curso.InstructorID(childComplexity), true
-
-	case "Curso.price":
-		if e.complexity.Curso.Price == nil {
-			break
-		}
-
-		return e.complexity.Curso.Price(childComplexity), true
-
-	case "Curso.title":
-		if e.complexity.Curso.Title == nil {
-			break
-		}
-
-		return e.complexity.Curso.Title(childComplexity), true
+		return e.complexity.Carrito.UserID(childComplexity), true
 
 	case "Mutation.actualizarPassword":
 		if e.complexity.Mutation.ActualizarPassword == nil {
@@ -178,17 +162,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.ActualizarUsername(childComplexity, args["username"].(string), args["newUsername"].(string)), true
 
-	case "Mutation.addCurso":
-		if e.complexity.Mutation.AddCurso == nil {
+	case "Mutation.addToCart":
+		if e.complexity.Mutation.AddToCart == nil {
 			break
 		}
 
-		args, err := ec.field_Mutation_addCurso_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_addToCart_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddCurso(childComplexity, args["courseID"].(string), args["instructorID"].(string), args["title"].(string), args["description"].(string), args["price"].(float64), args["category"].(string)), true
+		return e.complexity.Mutation.AddToCart(childComplexity, args["username"].(string), args["courseID"].(string), args["quantity"].(int)), true
 
 	case "Mutation.loginUsuario":
 		if e.complexity.Mutation.LoginUsuario == nil {
@@ -214,17 +198,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.RegisterUsuario(childComplexity, args["nameLastName"].(string), args["username"].(string), args["email"].(string), args["password"].(string)), true
 
-	case "Query.courseByID":
-		if e.complexity.Query.CourseByID == nil {
+	case "Mutation.removeFromCart":
+		if e.complexity.Mutation.RemoveFromCart == nil {
 			break
 		}
 
-		args, err := ec.field_Query_courseByID_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_removeFromCart_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.CourseByID(childComplexity, args["courseID"].(string)), true
+		return e.complexity.Mutation.RemoveFromCart(childComplexity, args["username"].(string), args["courseID"].(string)), true
 
 	case "Query.getUsuario":
 		if e.complexity.Query.GetUsuario == nil {
@@ -560,42 +544,49 @@ func (ec *executionContext) field_Mutation_actualizarUsername_argsNewUsername(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_addCurso_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Mutation_addToCart_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Mutation_addCurso_argsCourseID(ctx, rawArgs)
+	arg0, err := ec.field_Mutation_addToCart_argsUsername(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["courseID"] = arg0
-	arg1, err := ec.field_Mutation_addCurso_argsInstructorID(ctx, rawArgs)
+	args["username"] = arg0
+	arg1, err := ec.field_Mutation_addToCart_argsCourseID(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["instructorID"] = arg1
-	arg2, err := ec.field_Mutation_addCurso_argsTitle(ctx, rawArgs)
+	args["courseID"] = arg1
+	arg2, err := ec.field_Mutation_addToCart_argsQuantity(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["title"] = arg2
-	arg3, err := ec.field_Mutation_addCurso_argsDescription(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["description"] = arg3
-	arg4, err := ec.field_Mutation_addCurso_argsPrice(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["price"] = arg4
-	arg5, err := ec.field_Mutation_addCurso_argsCategory(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["category"] = arg5
+	args["quantity"] = arg2
 	return args, nil
 }
-func (ec *executionContext) field_Mutation_addCurso_argsCourseID(
+func (ec *executionContext) field_Mutation_addToCart_argsUsername(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["username"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+	if tmp, ok := rawArgs["username"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_addToCart_argsCourseID(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
@@ -617,113 +608,25 @@ func (ec *executionContext) field_Mutation_addCurso_argsCourseID(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Mutation_addCurso_argsInstructorID(
+func (ec *executionContext) field_Mutation_addToCart_argsQuantity(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (string, error) {
+) (int, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
 	// even if the argument is null.
-	_, ok := rawArgs["instructorID"]
+	_, ok := rawArgs["quantity"]
 	if !ok {
-		var zeroVal string
+		var zeroVal int
 		return zeroVal, nil
 	}
 
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("instructorID"))
-	if tmp, ok := rawArgs["instructorID"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("quantity"))
+	if tmp, ok := rawArgs["quantity"]; ok {
+		return ec.unmarshalNInt2int(ctx, tmp)
 	}
 
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Mutation_addCurso_argsTitle(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["title"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("title"))
-	if tmp, ok := rawArgs["title"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Mutation_addCurso_argsDescription(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["description"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("description"))
-	if tmp, ok := rawArgs["description"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Mutation_addCurso_argsPrice(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (float64, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["price"]
-	if !ok {
-		var zeroVal float64
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("price"))
-	if tmp, ok := rawArgs["price"]; ok {
-		return ec.unmarshalNFloat2float64(ctx, tmp)
-	}
-
-	var zeroVal float64
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Mutation_addCurso_argsCategory(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["category"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("category"))
-	if tmp, ok := rawArgs["category"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
+	var zeroVal int
 	return zeroVal, nil
 }
 
@@ -899,6 +802,65 @@ func (ec *executionContext) field_Mutation_registerUsuario_argsPassword(
 	return zeroVal, nil
 }
 
+func (ec *executionContext) field_Mutation_removeFromCart_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_removeFromCart_argsUsername(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["username"] = arg0
+	arg1, err := ec.field_Mutation_removeFromCart_argsCourseID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["courseID"] = arg1
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_removeFromCart_argsUsername(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["username"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+	if tmp, ok := rawArgs["username"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_removeFromCart_argsCourseID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["courseID"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
+	if tmp, ok := rawArgs["courseID"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -924,38 +886,6 @@ func (ec *executionContext) field_Query___type_argsName(
 
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 	if tmp, ok := rawArgs["name"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Query_courseByID_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_courseByID_argsCourseID(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["courseID"] = arg0
-	return args, nil
-}
-func (ec *executionContext) field_Query_courseByID_argsCourseID(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["courseID"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
-	if tmp, ok := rawArgs["courseID"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -1099,8 +1029,96 @@ func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Curso_courseID(ctx context.Context, field graphql.CollectedField, obj *model.Curso) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Curso_courseID(ctx, field)
+func (ec *executionContext) _Carrito_cartID(ctx context.Context, field graphql.CollectedField, obj *model.Carrito) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Carrito_cartID(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CartID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Carrito_cartID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Carrito",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Carrito_userID(ctx context.Context, field graphql.CollectedField, obj *model.Carrito) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Carrito_userID(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.UserID, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Carrito_userID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Carrito",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Carrito_courseID(ctx context.Context, field graphql.CollectedField, obj *model.Carrito) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Carrito_courseID(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1127,56 +1145,12 @@ func (ec *executionContext) _Curso_courseID(ctx context.Context, field graphql.C
 	}
 	res := resTmp.(string)
 	fc.Result = res
-	return ec.marshalNID2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Curso_courseID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Curso",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Curso_instructorID(ctx context.Context, field graphql.CollectedField, obj *model.Curso) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Curso_instructorID(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.InstructorID, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Curso_instructorID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Carrito_courseID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Curso",
+		Object:     "Carrito",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1187,8 +1161,8 @@ func (ec *executionContext) fieldContext_Curso_instructorID(_ context.Context, f
 	return fc, nil
 }
 
-func (ec *executionContext) _Curso_title(ctx context.Context, field graphql.CollectedField, obj *model.Curso) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Curso_title(ctx, field)
+func (ec *executionContext) _Carrito_quantity(ctx context.Context, field graphql.CollectedField, obj *model.Carrito) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Carrito_quantity(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1201,7 +1175,7 @@ func (ec *executionContext) _Curso_title(ctx context.Context, field graphql.Coll
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Title, nil
+		return obj.Quantity, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1213,151 +1187,19 @@ func (ec *executionContext) _Curso_title(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Curso_title(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Carrito_quantity(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Curso",
+		Object:     "Carrito",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Curso_description(ctx context.Context, field graphql.CollectedField, obj *model.Curso) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Curso_description(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Description, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Curso_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Curso",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Curso_price(ctx context.Context, field graphql.CollectedField, obj *model.Curso) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Curso_price(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Price, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(float64)
-	fc.Result = res
-	return ec.marshalNFloat2float64(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Curso_price(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Curso",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Float does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Curso_category(ctx context.Context, field graphql.CollectedField, obj *model.Curso) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Curso_category(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Category, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Curso_category(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Curso",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -1599,8 +1441,8 @@ func (ec *executionContext) fieldContext_Mutation_actualizarPassword(ctx context
 	return fc, nil
 }
 
-func (ec *executionContext) _Mutation_addCurso(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Mutation_addCurso(ctx, field)
+func (ec *executionContext) _Mutation_addToCart(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_addToCart(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -1613,24 +1455,21 @@ func (ec *executionContext) _Mutation_addCurso(ctx context.Context, field graphq
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddCurso(rctx, fc.Args["courseID"].(string), fc.Args["instructorID"].(string), fc.Args["title"].(string), fc.Args["description"].(string), fc.Args["price"].(float64), fc.Args["category"].(string))
+		return ec.resolvers.Mutation().AddToCart(rctx, fc.Args["username"].(string), fc.Args["courseID"].(string), fc.Args["quantity"].(int))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(*model.Curso)
+	res := resTmp.(*model.Carrito)
 	fc.Result = res
-	return ec.marshalNCurso2ᚖProyectoIngesoᚋgraphᚋmodelᚐCurso(ctx, field.Selections, res)
+	return ec.marshalOCarrito2ᚖProyectoIngesoᚋgraphᚋmodelᚐCarrito(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Mutation_addCurso(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Mutation_addToCart(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -1638,20 +1477,16 @@ func (ec *executionContext) fieldContext_Mutation_addCurso(ctx context.Context, 
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
+			case "cartID":
+				return ec.fieldContext_Carrito_cartID(ctx, field)
+			case "userID":
+				return ec.fieldContext_Carrito_userID(ctx, field)
 			case "courseID":
-				return ec.fieldContext_Curso_courseID(ctx, field)
-			case "instructorID":
-				return ec.fieldContext_Curso_instructorID(ctx, field)
-			case "title":
-				return ec.fieldContext_Curso_title(ctx, field)
-			case "description":
-				return ec.fieldContext_Curso_description(ctx, field)
-			case "price":
-				return ec.fieldContext_Curso_price(ctx, field)
-			case "category":
-				return ec.fieldContext_Curso_category(ctx, field)
+				return ec.fieldContext_Carrito_courseID(ctx, field)
+			case "quantity":
+				return ec.fieldContext_Carrito_quantity(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type Curso", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type Carrito", field.Name)
 		},
 	}
 	defer func() {
@@ -1661,7 +1496,59 @@ func (ec *executionContext) fieldContext_Mutation_addCurso(ctx context.Context, 
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_addCurso_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Mutation_addToCart_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_removeFromCart(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_removeFromCart(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().RemoveFromCart(rctx, fc.Args["username"].(string), fc.Args["courseID"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolean2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_removeFromCart(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_removeFromCart_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -1794,72 +1681,6 @@ func (ec *executionContext) fieldContext_Query_userByUsername(ctx context.Contex
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_userByUsername_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_courseByID(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_courseByID(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().CourseByID(rctx, fc.Args["courseID"].(string))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*model.Curso)
-	fc.Result = res
-	return ec.marshalOCurso2ᚖProyectoIngesoᚋgraphᚋmodelᚐCurso(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_courseByID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "courseID":
-				return ec.fieldContext_Curso_courseID(ctx, field)
-			case "instructorID":
-				return ec.fieldContext_Curso_instructorID(ctx, field)
-			case "title":
-				return ec.fieldContext_Curso_title(ctx, field)
-			case "description":
-				return ec.fieldContext_Curso_description(ctx, field)
-			case "price":
-				return ec.fieldContext_Curso_price(ctx, field)
-			case "category":
-				return ec.fieldContext_Curso_category(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Curso", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_courseByID_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4040,44 +3861,34 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(_ context.Context
 
 // region    **************************** object.gotpl ****************************
 
-var cursoImplementors = []string{"Curso"}
+var carritoImplementors = []string{"Carrito"}
 
-func (ec *executionContext) _Curso(ctx context.Context, sel ast.SelectionSet, obj *model.Curso) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, cursoImplementors)
+func (ec *executionContext) _Carrito(ctx context.Context, sel ast.SelectionSet, obj *model.Carrito) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, carritoImplementors)
 
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("Curso")
+			out.Values[i] = graphql.MarshalString("Carrito")
+		case "cartID":
+			out.Values[i] = ec._Carrito_cartID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "userID":
+			out.Values[i] = ec._Carrito_userID(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "courseID":
-			out.Values[i] = ec._Curso_courseID(ctx, field, obj)
+			out.Values[i] = ec._Carrito_courseID(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "instructorID":
-			out.Values[i] = ec._Curso_instructorID(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "title":
-			out.Values[i] = ec._Curso_title(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "description":
-			out.Values[i] = ec._Curso_description(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "price":
-			out.Values[i] = ec._Curso_price(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "category":
-			out.Values[i] = ec._Curso_category(ctx, field, obj)
+		case "quantity":
+			out.Values[i] = ec._Carrito_quantity(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -4139,13 +3950,14 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_actualizarPassword(ctx, field)
 			})
-		case "addCurso":
+		case "addToCart":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
-				return ec._Mutation_addCurso(ctx, field)
+				return ec._Mutation_addToCart(ctx, field)
 			})
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
+		case "removeFromCart":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_removeFromCart(ctx, field)
+			})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4217,25 +4029,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_userByUsername(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "courseByID":
-			field := field
-
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_courseByID(ctx, field)
 				return res
 			}
 
@@ -4681,35 +4474,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNCurso2ProyectoIngesoᚋgraphᚋmodelᚐCurso(ctx context.Context, sel ast.SelectionSet, v model.Curso) graphql.Marshaler {
-	return ec._Curso(ctx, sel, &v)
-}
-
-func (ec *executionContext) marshalNCurso2ᚖProyectoIngesoᚋgraphᚋmodelᚐCurso(ctx context.Context, sel ast.SelectionSet, v *model.Curso) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._Curso(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v interface{}) (float64, error) {
-	res, err := graphql.UnmarshalFloatContext(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
-	res := graphql.MarshalFloatContext(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return graphql.WrapContextMarshaler(ctx, res)
-}
-
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface{}) (string, error) {
 	res, err := graphql.UnmarshalID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -4717,6 +4481,21 @@ func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface
 
 func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	res := graphql.MarshalID(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
+	res, err := graphql.UnmarshalInt(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	res := graphql.MarshalInt(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -5019,11 +4798,11 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) marshalOCurso2ᚖProyectoIngesoᚋgraphᚋmodelᚐCurso(ctx context.Context, sel ast.SelectionSet, v *model.Curso) graphql.Marshaler {
+func (ec *executionContext) marshalOCarrito2ᚖProyectoIngesoᚋgraphᚋmodelᚐCarrito(ctx context.Context, sel ast.SelectionSet, v *model.Carrito) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return ec._Curso(ctx, sel, v)
+	return ec._Carrito(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

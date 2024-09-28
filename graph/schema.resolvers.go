@@ -122,24 +122,18 @@ func (r *mutationResolver) ActualizarPassword(ctx context.Context, username stri
 	return &successMsg, nil
 }
 
-// AddCurso añade un nuevo curso a la base de datos
-func (r *mutationResolver) AddCurso(ctx context.Context, courseID string, instructorID string, title string, description string, price float64, category string) (*model.Curso, error) {
-	// Crear el nuevo curso
-	curso := &model.Curso{
-		CourseID:     courseID,
-		InstructorID: instructorID,
-		Title:        title,
-		Description:  description,
-		Price:        price,
-		Category:     category,
-	}
+// AddToCart is the resolver for the addToCart field.
+func (r *mutationResolver) AddToCart(ctx context.Context, username string, courseID string, quantity int) (*model.Carrito, error) {
+	return r.Resolver.AddToCart(ctx, username, courseID, quantity)
+}
 
-	// Guardar el curso en la base de datos
-	if err := r.DB.Create(curso).Error; err != nil {
-		return nil, fmt.Errorf("error al crear el curso: %v", err)
+// RemoveFromCart is the resolver for the removeFromCart field.
+func (r *mutationResolver) RemoveFromCart(ctx context.Context, username string, courseID string) (*bool, error) {
+	success, err := r.Resolver.RemoveFromCart(ctx, username, courseID)
+	if err != nil {
+		return nil, err
 	}
-
-	return curso, nil
+	return success, nil
 }
 
 // GetUsuario maneja la consulta para obtener un usuario por su ID.
@@ -170,17 +164,6 @@ func (r *queryResolver) UserByUsername(ctx context.Context, username string) (*m
 	}
 
 	return &usuario, nil
-}
-
-// CourseByID is the resolver for the courseByID field.
-func (r *queryResolver) CourseByID(ctx context.Context, courseID string) (*model.Curso, error) {
-	var course model.Curso
-	// Buscar el curso por ID en la base de datos
-	if err := r.DB.Where("course_id = ?", courseID).First(&course).Error; err != nil {
-		return nil, fmt.Errorf("curso no encontrado")
-	}
-
-	return &course, nil
 }
 
 // Mutation returns MutationResolver implementation.
