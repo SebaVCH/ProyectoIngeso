@@ -4,6 +4,7 @@ import (
 	"ProyectoIngeso/graph"
 	"ProyectoIngeso/graph/model"
 	"ProyectoIngeso/models"
+	"ProyectoIngeso/mq"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/rs/cors" // Importar el middleware CORS
@@ -43,6 +44,13 @@ func init() {
 }
 
 func main() {
+	// Iniciar consumidor de RabbitMQ
+	go func() {
+		err := utils.StartUserConsumer() // Asegúrate de que la función StartUserConsumer sea pública
+		if err != nil {
+			log.Fatalf("Error al iniciar el consumidor de RabbitMQ: %s", err)
+		}
+	}()
 	// Resolver
 	resolver := graph.Resolver{DB: bd}
 

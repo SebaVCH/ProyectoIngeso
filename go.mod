@@ -1,11 +1,14 @@
 module ProyectoIngeso
 
-go 1.22
+go 1.22.5
+
+toolchain go1.23.1
 
 require (
 	github.com/99designs/gqlgen v0.17.53
 	github.com/google/uuid v1.6.0
 	github.com/rs/cors v1.11.1
+	github.com/streadway/amqp v1.1.0
 	github.com/vektah/gqlparser/v2 v2.5.16
 	golang.org/x/crypto v0.27.0
 	gorm.io/driver/sqlite v1.5.6
