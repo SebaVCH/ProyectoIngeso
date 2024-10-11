@@ -87,16 +87,38 @@ func StartUserConsumer() error {
                 continue
             }
 
-            // Responder con el email del usuario
-            response := struct {
-                Email string `json:"email"`
-            }{
-                Email: usuario.Email,
-            }
+            // Manejar los diferentes patrones (email o nombre)
+            var responseBody []byte
 
-            responseBody, err := json.Marshal(response)
-            if err != nil {
-                log.Printf("Error marshalling response: %s", err)
+            switch msg.Pattern {
+            case "get_user_email":
+                // Responder con el email del usuario
+                response := struct {
+                    Email string `json:"email"`
+                }{
+                    Email: usuario.Email,
+                }
+                responseBody, err = json.Marshal(response)
+                if err != nil {
+                    log.Printf("Error marshalling response: %s", err)
+                    continue
+                }
+
+            case "get_user_name":
+                // Responder con el nombre del usuario
+                response := struct {
+                    Name string `json:"name"`
+                }{
+                    Name: usuario.NameLastName, // Aquí usas la columna de nombre y apellido
+                }
+                responseBody, err = json.Marshal(response)
+                if err != nil {
+                    log.Printf("Error marshalling response: %s", err)
+                    continue
+                }
+
+            default:
+                log.Printf("Patrón no soportado: %s", msg.Pattern)
                 continue
             }
 
