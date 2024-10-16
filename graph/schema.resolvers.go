@@ -15,26 +15,39 @@ import (
 
 // RegisterUsuario maneja la mutación para registrar un usuario.
 func (r *mutationResolver) RegisterUsuario(ctx context.Context, nameLastName string, username string, email string, password string) (*model.Usuario, error) {
+	// 1. Hash de la contraseña
 	hash, err := utils.HashContrasena(password)
 	if err != nil {
 		return nil, errors.New("error al cifrar la contraseña")
 	}
 
-	// Crear el modelo de usuario en la base de datos
+	// 2. Crear el modelo de usuario en la base de datos
 	usuario := &models.Usuario{
 		UserID:       generateUniqueID(), // Implementa esta función para generar un ID único
 		NameLastName: nameLastName,
 		Username:     username,
 		Email:        email,
 		Password:     hash,
-		Role:         "user", // Asigna un rol por defecto si es necesario
+		Role:         "user", // Asigna un rol por defecto
 	}
 
 	if err := r.DB.Create(usuario).Error; err != nil {
 		return nil, errors.New("no se pudo registrar el usuario")
 	}
 
-	// Convertir el modelo de base de datos a modelo GraphQL
+	// 3. Crear el carrito asociado al usuario
+	carrito := &models.Carrito{
+		CartID:   generateUniqueID(), // Genera un ID único para el carrito
+		UserID:   usuario.UserID,     // Relacionar el carrito con el usuario creado
+		CourseID: "",                 // Inicialmente sin curso asignado
+		Quantity: 0,                  // Inicialmente vacío
+	}
+
+	if err := r.DB.Create(carrito).Error; err != nil {
+		return nil, errors.New("no se pudo crear el carrito del usuario")
+	}
+
+	// 4. Convertir el modelo de usuario a modelo GraphQL
 	return &model.Usuario{
 		UserID:       usuario.UserID,
 		NameLastName: usuario.NameLastName,
@@ -44,6 +57,7 @@ func (r *mutationResolver) RegisterUsuario(ctx context.Context, nameLastName str
 		Role:         usuario.Role,
 	}, nil
 }
+
 
 // LoginUsuario maneja la mutación para iniciar sesión.
 func (r *mutationResolver) LoginUsuario(ctx context.Context, identificador string, password string) (*string, error) {
@@ -123,13 +137,13 @@ func (r *mutationResolver) ActualizarPassword(ctx context.Context, username stri
 }
 
 // AddToCart is the resolver for the addToCart field.
-func (r *mutationResolver) AddToCart(ctx context.Context, username string, courseID string, quantity int) (*model.Carrito, error) {
-	return r.Resolver.AddToCart(ctx, username, courseID, quantity)
+func (r *mutationResolver) AddToCart(ctx context.Context, email string, courseID string, quantity int) (*model.Carrito, error) {
+	return r.Resolver.AddToCart(ctx, email, courseID, quantity)
 }
 
 // RemoveFromCart is the resolver for the removeFromCart field.
-func (r *mutationResolver) RemoveFromCart(ctx context.Context, username string, courseID string) (*bool, error) {
-	success, err := r.Resolver.RemoveFromCart(ctx, username, courseID)
+func (r *mutationResolver) RemoveFromCart(ctx context.Context, email string, courseID string) (*bool, error) {
+	success, err := r.Resolver.RemoveFromCart(ctx, email, courseID)
 	if err != nil {
 		return nil, err
 	}
@@ -165,6 +179,8 @@ func (r *queryResolver) UserByUsername(ctx context.Context, username string) (*m
 
 	return &usuario, nil
 }
+
+
 
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }

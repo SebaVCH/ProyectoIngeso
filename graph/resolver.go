@@ -26,25 +26,41 @@ func (r *Resolver) RegistrarUsuario(ctx context.Context, input struct {
 	CorreoElectronico string
 	Contrasena        string
 }) (*models.Usuario, error) {
-	// Cifrar la contraseña
+	// 1. Cifrar la contraseña
 	hash, err := utils.HashContrasena(input.Contrasena)
 	if err != nil {
 		return nil, errors.New("error al cifrar la contraseña")
 	}
 
+	// 2. Crear el usuario
 	usuario := models.Usuario{
 		UserID:       generateUniqueID(), // Implementa esta función para generar un ID único
 		NameLastName: input.NombreYapellido,
 		Username:     input.NombreUsuario,
 		Email:        input.CorreoElectronico,
 		Password:     hash,
-		Role:         "user", // Asigna un rol por defecto si es necesario
+		Role:         "user", // Rol por defecto
 	}
 
+	// Guardar el usuario en la base de datos
 	if err := r.DB.Create(&usuario).Error; err != nil {
 		return nil, errors.New("error al crear el usuario")
 	}
 
+	// 3. Crear el carrito asociado al usuario recién creado
+	carrito := models.Carrito{
+		CartID:   generateUniqueID(), // Genera un ID único para el carrito
+		UserID:   usuario.UserID,     // Asocia el carrito con el usuario
+		CourseID: "",                 // Inicialmente sin curso
+		Quantity: 0,                  // Carrito vacío al inicio
+	}
+
+	// Guardar el carrito en la base de datos
+	if err := r.DB.Create(&carrito).Error; err != nil {
+		return nil, errors.New("error al crear el carrito del usuario")
+	}
+
+	// 4. Retornar el usuario creado
 	return &usuario, nil
 }
 
@@ -118,9 +134,9 @@ func (r *Resolver) UpdatePassword(ctx context.Context, username string, oldPassw
 }
 
 // AddToCart agrega un curso al carrito del usuario.
-func (r *Resolver) AddToCart(ctx context.Context, username string, courseID string, quantity int) (*model.Carrito, error) {
+func (r *Resolver) AddToCart(ctx context.Context, email string, courseID string, quantity int) (*model.Carrito, error) {
 	// Verificar si el usuario existe y obtener el userID.
-	userID, err := r.checkUserExists(username)
+	userID, err := r.checkUserExists(email)
 	if err != nil {
 		return nil, fmt.Errorf("error al verificar el usuario: %v", err)
 	}
@@ -241,3 +257,4 @@ func (r *queryResolver) UsuarioByUsername(ctx context.Context, username string) 
 func generateUniqueID() string {
 	return uuid.NewString()
 }
+
