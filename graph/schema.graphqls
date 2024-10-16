@@ -20,14 +20,13 @@ type Mutation {
     loginUsuario(identificador: String!, password: String!): String
     actualizarUsername(username: String!, newUsername: String!): Usuario
     actualizarPassword(username: String!, oldPassword: String!, newPassword: String!): String
-    addToCart(email: String!, courseID: String!, quantity: Int!): Carrito
-    removeFromCart(email: String!, courseID: String!): Boolean
+    addToCart(username: String!, courseID: String!, quantity: Int!): Carrito
+    removeFromCart(username: String!, courseID: String!): Boolean
 }
 
 type Query {
     getUsuario(id: ID!): Usuario
     userByUsername(username: String!): Usuario
-    
 }
 
 
