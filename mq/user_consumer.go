@@ -14,8 +14,8 @@ import (
 
 // Definir la estructura que corresponde al mensaje recibido desde RabbitMQ
 type RabbitMQMessage struct {
-    Pattern string `json:"pattern"`
-    Data    string `json:"data"`
+    Pattern string `json:"pattern"` // "get_user_id" o "get_user_name"
+    Data    string `json:"data"`    // Email del usuario para "get_user_id"
     ID      string `json:"id"`
 }
 
@@ -75,29 +75,26 @@ func StartUserConsumer() error {
                 continue
             }
 
-            // Extraer el userID del campo Data
-            userID := msg.Data
-            fmt.Printf("UserID deserializado: %s\n", userID)
-
-            // Obtener la información del usuario desde la base de datos
-            var usuario models.Usuario
-            result := db.Where("user_id = ?", userID).First(&usuario)
-            if result.Error != nil {
-                log.Printf("Error finding user with ID %s: %s", userID, result.Error)
-                continue
-            }
-
-            // Manejar los diferentes patrones (email o nombre)
+            // Definir la variable para la respuesta
             var responseBody []byte
 
             switch msg.Pattern {
-            case "get_user_email":
-                // Responder con el email del usuario
-                response := struct {
-                    Email string `json:"email"`
-                }{
-                    Email: usuario.Email,
+            case "get_user_id":
+                // Buscar el usuario por email
+                var usuario models.Usuario
+                result := db.Where("email = ?", msg.Data).First(&usuario)
+                if result.Error != nil {
+                    log.Printf("No se encontró un usuario con el correo %s: %s", msg.Data, result.Error)
+                    continue
                 }
+
+                // Responder con la userId del usuario
+                response := struct {
+                    UserID string `json:"userID"`
+                }{
+                    UserID: usuario.UserID,
+                }
+
                 responseBody, err = json.Marshal(response)
                 if err != nil {
                     log.Printf("Error marshalling response: %s", err)
@@ -105,12 +102,21 @@ func StartUserConsumer() error {
                 }
 
             case "get_user_name":
+                // Buscar el usuario por su ID
+                var usuario models.Usuario
+                result := db.Where("user_id = ?", msg.Data).First(&usuario)
+                if result.Error != nil {
+                    log.Printf("No se encontró un usuario con ID %s: %s", msg.Data, result.Error)
+                    continue
+                }
+
                 // Responder con el nombre del usuario
                 response := struct {
                     Name string `json:"name"`
                 }{
-                    Name: usuario.NameLastName, // Aquí usas la columna de nombre y apellido
+                    Name: usuario.NameLastName, // Usar la columna de nombre completo
                 }
+
                 responseBody, err = json.Marshal(response)
                 if err != nil {
                     log.Printf("Error marshalling response: %s", err)
