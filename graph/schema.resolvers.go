@@ -58,7 +58,6 @@ func (r *mutationResolver) RegisterUsuario(ctx context.Context, nameLastName str
 	}, nil
 }
 
-
 // LoginUsuario maneja la mutación para iniciar sesión.
 func (r *mutationResolver) LoginUsuario(ctx context.Context, identificador string, password string) (*string, error) {
 	var usuario models.Usuario
@@ -150,6 +149,16 @@ func (r *mutationResolver) RemoveFromCart(ctx context.Context, username string, 
 	return success, nil
 }
 
+// ViewCartByUsername is the resolver for the viewCartByUsername field.
+func (r *mutationResolver) ViewCartByUsername(ctx context.Context, username string) ([]*model.Carrito, error) {
+	return r.Resolver.ViewCartByUsername(ctx, username)
+}
+
+// ViewCartByUserID is the resolver for the viewCartByUserID field.
+func (r *mutationResolver) ViewCartByUserID(ctx context.Context, userID string) ([]*model.Carrito, error) {
+	return r.Resolver.ViewCartByUserID(ctx, userID)
+}
+
 // GetUsuario maneja la consulta para obtener un usuario por su ID.
 func (r *queryResolver) GetUsuario(ctx context.Context, id string) (*model.Usuario, error) {
 	var usuario models.Usuario
@@ -188,3 +197,18 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+/*
+	func (r *queryResolver) ViewCartByUserID(ctx context.Context, userID string) ([]*model.Carrito, error) {
+	return r.Resolver.ViewCartByUserID(ctx, userID)
+}
+func (r *queryResolver) ViewCartByUsername(ctx context.Context, username string) ([]*model.Carrito, error) {
+	return r.Resolver.ViewCartByUsername(ctx, username)
+}
+*/

@@ -64,7 +64,6 @@ func (r *Resolver) RegistrarUsuario(ctx context.Context, input struct {
 	return &usuario, nil
 }
 
-
 // IniciarSesion - maneja el inicio de sesión del usuario
 func (r *Resolver) IniciarSesion(ctx context.Context, input struct {
 	Identificador string
@@ -196,6 +195,35 @@ func (r *Resolver) RemoveFromCart(ctx context.Context, username string, courseID
 
 	success := true
 	return &success, nil
+}
+
+// ViewCartByUserID permite ver el carrito del usuario utilizando el userID.
+func (r *Resolver) ViewCartByUserID(ctx context.Context, userID string) ([]*model.Carrito, error) {
+	var carrito []*model.Carrito
+
+	// Buscar todos los elementos del carrito asociados al userID.
+	if err := r.DB.Where("user_id = ?", userID).Find(&carrito).Error; err != nil {
+		return nil, fmt.Errorf("error al obtener el carrito: %v", err)
+	}
+
+	return carrito, nil
+}
+
+// ViewCartByUsername permite ver el carrito del usuario utilizando el nombre de usuario.
+func (r *Resolver) ViewCartByUsername(ctx context.Context, username string) ([]*model.Carrito, error) {
+	// Verificar si el usuario existe y obtener el userID.
+	userID, err := r.checkUserExists(username)
+	if err != nil {
+		return nil, fmt.Errorf("error al verificar el usuario: %v", err)
+	}
+
+	// Buscar todos los elementos del carrito asociados al userID.
+	var carrito []*model.Carrito
+	if err := r.DB.Where("user_id = ?", userID).Find(&carrito).Error; err != nil {
+		return nil, fmt.Errorf("error al obtener el carrito: %v", err)
+	}
+
+	return carrito, nil
 }
 
 // checkUserExists verifica si un usuario existe en la base de datos y devuelve su userID.
