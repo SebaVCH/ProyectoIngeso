@@ -6,7 +6,6 @@ type Carrito struct {
 	CartID   string `json:"cartID"`
 	UserID   string `json:"userID"`
 	CourseID string `json:"courseID"`
-	Quantity int    `json:"quantity"`
 }
 
 type Mutation struct {

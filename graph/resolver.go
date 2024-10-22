@@ -52,7 +52,6 @@ func (r *Resolver) RegistrarUsuario(ctx context.Context, input struct {
 		CartID:   generateUniqueID(), // Genera un ID único para el carrito
 		UserID:   usuario.UserID,     // Asocia el carrito con el usuario
 		CourseID: "",                 // Inicialmente sin curso
-		Quantity: 0,                  // Carrito vacío al inicio
 	}
 
 	// Guardar el carrito en la base de datos
@@ -134,7 +133,7 @@ func (r *Resolver) UpdatePassword(ctx context.Context, username string, oldPassw
 }
 
 // AddToCart agrega un curso al carrito del usuario.
-func (r *Resolver) AddToCart(ctx context.Context, username string, courseID string, quantity int) (*model.Carrito, error) {
+func (r *Resolver) AddToCart(ctx context.Context, username string, courseID string) (*model.Carrito, error) {
 	// Verificar si el usuario existe y obtener el userID.
 	userID, err := r.checkUserExists(username)
 	if err != nil {
@@ -155,7 +154,6 @@ func (r *Resolver) AddToCart(ctx context.Context, username string, courseID stri
 		CartID:   uuid.New().String(),
 		UserID:   userID, // Asegúrate de que esta variable no esté vacía.
 		CourseID: courseID,
-		Quantity: quantity,
 	}
 
 	// Verificar si el campo UserID no está vacío.

@@ -50,14 +50,13 @@ type ComplexityRoot struct {
 	Carrito struct {
 		CartID   func(childComplexity int) int
 		CourseID func(childComplexity int) int
-		Quantity func(childComplexity int) int
 		UserID   func(childComplexity int) int
 	}
 
 	Mutation struct {
 		ActualizarPassword func(childComplexity int, username string, oldPassword string, newPassword string) int
 		ActualizarUsername func(childComplexity int, username string, newUsername string) int
-		AddToCart          func(childComplexity int, username string, courseID string, quantity int) int
+		AddToCart          func(childComplexity int, username string, courseID string) int
 		LoginUsuario       func(childComplexity int, identificador string, password string) int
 		RegisterUsuario    func(childComplexity int, nameLastName string, username string, email string, password string) int
 		RemoveFromCart     func(childComplexity int, username string, courseID string) int
@@ -85,7 +84,7 @@ type MutationResolver interface {
 	LoginUsuario(ctx context.Context, identificador string, password string) (*string, error)
 	ActualizarUsername(ctx context.Context, username string, newUsername string) (*model.Usuario, error)
 	ActualizarPassword(ctx context.Context, username string, oldPassword string, newPassword string) (*string, error)
-	AddToCart(ctx context.Context, username string, courseID string, quantity int) (*model.Carrito, error)
+	AddToCart(ctx context.Context, username string, courseID string) (*model.Carrito, error)
 	RemoveFromCart(ctx context.Context, username string, courseID string) (*bool, error)
 	ViewCartByUsername(ctx context.Context, username string) ([]*model.Carrito, error)
 	ViewCartByUserID(ctx context.Context, userID string) ([]*model.Carrito, error)
@@ -128,13 +127,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Carrito.CourseID(childComplexity), true
 
-	case "Carrito.quantity":
-		if e.complexity.Carrito.Quantity == nil {
-			break
-		}
-
-		return e.complexity.Carrito.Quantity(childComplexity), true
-
 	case "Carrito.userID":
 		if e.complexity.Carrito.UserID == nil {
 			break
@@ -176,7 +168,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddToCart(childComplexity, args["username"].(string), args["courseID"].(string), args["quantity"].(int)), true
+		return e.complexity.Mutation.AddToCart(childComplexity, args["username"].(string), args["courseID"].(string)), true
 
 	case "Mutation.loginUsuario":
 		if e.complexity.Mutation.LoginUsuario == nil {
@@ -585,11 +577,6 @@ func (ec *executionContext) field_Mutation_addToCart_args(ctx context.Context, r
 		return nil, err
 	}
 	args["courseID"] = arg1
-	arg2, err := ec.field_Mutation_addToCart_argsQuantity(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["quantity"] = arg2
 	return args, nil
 }
 func (ec *executionContext) field_Mutation_addToCart_argsUsername(
@@ -633,28 +620,6 @@ func (ec *executionContext) field_Mutation_addToCart_argsCourseID(
 	}
 
 	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Mutation_addToCart_argsQuantity(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["quantity"]
-	if !ok {
-		var zeroVal int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("quantity"))
-	if tmp, ok := rawArgs["quantity"]; ok {
-		return ec.unmarshalNInt2int(ctx, tmp)
-	}
-
-	var zeroVal int
 	return zeroVal, nil
 }
 
@@ -1253,50 +1218,6 @@ func (ec *executionContext) fieldContext_Carrito_courseID(_ context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Carrito_quantity(ctx context.Context, field graphql.CollectedField, obj *model.Carrito) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Carrito_quantity(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Quantity, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Carrito_quantity(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Carrito",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
 func (ec *executionContext) _Mutation_registerUsuario(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_registerUsuario(ctx, field)
 	if err != nil {
@@ -1547,7 +1468,7 @@ func (ec *executionContext) _Mutation_addToCart(ctx context.Context, field graph
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddToCart(rctx, fc.Args["username"].(string), fc.Args["courseID"].(string), fc.Args["quantity"].(int))
+		return ec.resolvers.Mutation().AddToCart(rctx, fc.Args["username"].(string), fc.Args["courseID"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1575,8 +1496,6 @@ func (ec *executionContext) fieldContext_Mutation_addToCart(ctx context.Context,
 				return ec.fieldContext_Carrito_userID(ctx, field)
 			case "courseID":
 				return ec.fieldContext_Carrito_courseID(ctx, field)
-			case "quantity":
-				return ec.fieldContext_Carrito_quantity(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Carrito", field.Name)
 		},
@@ -1692,8 +1611,6 @@ func (ec *executionContext) fieldContext_Mutation_viewCartByUsername(ctx context
 				return ec.fieldContext_Carrito_userID(ctx, field)
 			case "courseID":
 				return ec.fieldContext_Carrito_courseID(ctx, field)
-			case "quantity":
-				return ec.fieldContext_Carrito_quantity(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Carrito", field.Name)
 		},
@@ -1757,8 +1674,6 @@ func (ec *executionContext) fieldContext_Mutation_viewCartByUserID(ctx context.C
 				return ec.fieldContext_Carrito_userID(ctx, field)
 			case "courseID":
 				return ec.fieldContext_Carrito_courseID(ctx, field)
-			case "quantity":
-				return ec.fieldContext_Carrito_quantity(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Carrito", field.Name)
 		},
@@ -4109,11 +4024,6 @@ func (ec *executionContext) _Carrito(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "quantity":
-			out.Values[i] = ec._Carrito_quantity(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4771,21 +4681,6 @@ func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface
 
 func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	res := graphql.MarshalID(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
-}
-
-func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}) (int, error) {
-	res, err := graphql.UnmarshalInt(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
-	res := graphql.MarshalInt(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")

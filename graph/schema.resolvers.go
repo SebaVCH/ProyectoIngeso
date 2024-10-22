@@ -40,7 +40,6 @@ func (r *mutationResolver) RegisterUsuario(ctx context.Context, nameLastName str
 		CartID:   generateUniqueID(), // Genera un ID único para el carrito
 		UserID:   usuario.UserID,     // Relacionar el carrito con el usuario creado
 		CourseID: "",                 // Inicialmente sin curso asignado
-		Quantity: 0,                  // Inicialmente vacío
 	}
 
 	if err := r.DB.Create(carrito).Error; err != nil {
@@ -136,8 +135,8 @@ func (r *mutationResolver) ActualizarPassword(ctx context.Context, username stri
 }
 
 // AddToCart is the resolver for the addToCart field.
-func (r *mutationResolver) AddToCart(ctx context.Context, username string, courseID string, quantity int) (*model.Carrito, error) {
-	return r.Resolver.AddToCart(ctx, username, courseID, quantity)
+func (r *mutationResolver) AddToCart(ctx context.Context, username string, courseID string) (*model.Carrito, error) {
+	return r.Resolver.AddToCart(ctx, username, courseID)
 }
 
 // RemoveFromCart is the resolver for the removeFromCart field.
@@ -197,18 +196,3 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-
-// !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you have
-// one last chance to move it out of harms way if you want. There are two reasons this happens:
-//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
-//    it when you're done.
-//  - You have helper methods in this file. Move them out to keep these resolver files clean.
-/*
-	func (r *queryResolver) ViewCartByUserID(ctx context.Context, userID string) ([]*model.Carrito, error) {
-	return r.Resolver.ViewCartByUserID(ctx, userID)
-}
-func (r *queryResolver) ViewCartByUsername(ctx context.Context, username string) ([]*model.Carrito, error) {
-	return r.Resolver.ViewCartByUsername(ctx, username)
-}
-*/

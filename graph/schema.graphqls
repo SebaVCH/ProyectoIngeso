@@ -11,7 +11,6 @@ type Carrito {
     cartID: String!
     userID: String!
     courseID: String!
-    quantity: Int!
 }
 
 
@@ -20,7 +19,7 @@ type Mutation {
     loginUsuario(identificador: String!, password: String!): String
     actualizarUsername(username: String!, newUsername: String!): Usuario
     actualizarPassword(username: String!, oldPassword: String!, newPassword: String!): String
-    addToCart(username: String!, courseID: String!, quantity: Int!): Carrito
+    addToCart(username: String!, courseID: String!): Carrito
     removeFromCart(username: String!, courseID: String!): Boolean
     viewCartByUsername(username: String!): [Carrito!]!
     viewCartByUserID(userID: String!): [Carrito!]!
