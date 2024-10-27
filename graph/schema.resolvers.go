@@ -158,6 +158,11 @@ func (r *mutationResolver) ViewCartByUserID(ctx context.Context, userID string) 
 	return r.Resolver.ViewCartByUserID(ctx, userID)
 }
 
+// DeleteUserByUsername is the resolver for the deleteUserByUsername field.
+func (r *mutationResolver) DeleteUserByUsername(ctx context.Context, username string) (string, error) {
+	return r.Resolver.DeleteUserByUsername(ctx, username)
+}
+
 // GetUsuario maneja la consulta para obtener un usuario por su ID.
 func (r *queryResolver) GetUsuario(ctx context.Context, id string) (*model.Usuario, error) {
 	var usuario models.Usuario

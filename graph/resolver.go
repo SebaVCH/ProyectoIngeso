@@ -132,6 +132,23 @@ func (r *Resolver) UpdatePassword(ctx context.Context, username string, oldPassw
 	return "Contraseña actualizada exitosamente", nil
 }
 
+// DeleteUserByUsername - elimina un usuario por su nombre de usuario
+func (r *Resolver) DeleteUserByUsername(ctx context.Context, username string) (string, error) {
+	var usuario models.Usuario
+
+	// Buscar el usuario por el nombre de usuario
+	if err := r.DB.Where("username = ?", username).First(&usuario).Error; err != nil {
+		return "", errors.New("usuario no encontrado")
+	}
+
+	// Eliminar el usuario de la base de datos
+	if err := r.DB.Delete(&usuario).Error; err != nil {
+		return "", errors.New("no se pudo eliminar el usuario")
+	}
+
+	return "Usuario eliminado exitosamente", nil
+}
+
 // AddToCart agrega un curso al carrito del usuario.
 func (r *Resolver) AddToCart(ctx context.Context, username string, courseID string) (*model.Carrito, error) {
 	// Verificar si el usuario existe y obtener el userID.

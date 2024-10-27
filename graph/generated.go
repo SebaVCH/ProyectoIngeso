@@ -54,14 +54,15 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		ActualizarPassword func(childComplexity int, username string, oldPassword string, newPassword string) int
-		ActualizarUsername func(childComplexity int, username string, newUsername string) int
-		AddToCart          func(childComplexity int, username string, courseID string) int
-		LoginUsuario       func(childComplexity int, identificador string, password string) int
-		RegisterUsuario    func(childComplexity int, nameLastName string, username string, email string, password string) int
-		RemoveFromCart     func(childComplexity int, username string, courseID string) int
-		ViewCartByUserID   func(childComplexity int, userID string) int
-		ViewCartByUsername func(childComplexity int, username string) int
+		ActualizarPassword   func(childComplexity int, username string, oldPassword string, newPassword string) int
+		ActualizarUsername   func(childComplexity int, username string, newUsername string) int
+		AddToCart            func(childComplexity int, username string, courseID string) int
+		DeleteUserByUsername func(childComplexity int, username string) int
+		LoginUsuario         func(childComplexity int, identificador string, password string) int
+		RegisterUsuario      func(childComplexity int, nameLastName string, username string, email string, password string) int
+		RemoveFromCart       func(childComplexity int, username string, courseID string) int
+		ViewCartByUserID     func(childComplexity int, userID string) int
+		ViewCartByUsername   func(childComplexity int, username string) int
 	}
 
 	Query struct {
@@ -89,6 +90,7 @@ type MutationResolver interface {
 	RemoveFromCart(ctx context.Context, username string, courseID string) (*bool, error)
 	ViewCartByUsername(ctx context.Context, username string) ([]*model.Carrito, error)
 	ViewCartByUserID(ctx context.Context, userID string) ([]*model.Carrito, error)
+	DeleteUserByUsername(ctx context.Context, username string) (string, error)
 }
 type QueryResolver interface {
 	GetUsuario(ctx context.Context, id string) (*model.Usuario, error)
@@ -171,6 +173,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.AddToCart(childComplexity, args["username"].(string), args["courseID"].(string)), true
+
+	case "Mutation.deleteUserByUsername":
+		if e.complexity.Mutation.DeleteUserByUsername == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_deleteUserByUsername_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteUserByUsername(childComplexity, args["username"].(string)), true
 
 	case "Mutation.loginUsuario":
 		if e.complexity.Mutation.LoginUsuario == nil {
@@ -625,6 +639,38 @@ func (ec *executionContext) field_Mutation_addToCart_argsCourseID(
 
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
 	if tmp, ok := rawArgs["courseID"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_deleteUserByUsername_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_deleteUserByUsername_argsUsername(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["username"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_deleteUserByUsername_argsUsername(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["username"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
+	if tmp, ok := rawArgs["username"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -1695,6 +1741,61 @@ func (ec *executionContext) fieldContext_Mutation_viewCartByUserID(ctx context.C
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_viewCartByUserID_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_deleteUserByUsername(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_deleteUserByUsername(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteUserByUsername(rctx, fc.Args["username"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_deleteUserByUsername(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_deleteUserByUsername_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4167,6 +4268,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "viewCartByUserID":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_viewCartByUserID(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deleteUserByUsername":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_deleteUserByUsername(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
