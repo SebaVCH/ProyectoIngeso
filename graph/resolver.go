@@ -186,6 +186,22 @@ func (r *Resolver) AddToCart(ctx context.Context, username string, courseID stri
 	return cartItem, nil
 }
 
+// DeleteCartByID elimina un carrito por su ID
+func (r *Resolver) DeleteCartByID(ctx context.Context, cartID string) (string, error) {
+	// Buscar el carrito por su ID
+	var carrito model.Carrito
+	if err := r.DB.Where("cart_id = ?", cartID).First(&carrito).Error; err != nil {
+		return "", errors.New("carrito no encontrado")
+	}
+
+	// Eliminar el carrito de la base de datos
+	if err := r.DB.Delete(&carrito).Error; err != nil {
+		return "", errors.New("no se pudo eliminar el carrito")
+	}
+
+	return "Carrito eliminado exitosamente", nil
+}
+
 // RemoveFromCart elimina un curso del carrito del usuario.
 func (r *Resolver) RemoveFromCart(ctx context.Context, username string, courseID string) (*bool, error) {
 	// Verificar si el usuario existe y obtener su userID.

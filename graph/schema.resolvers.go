@@ -139,6 +139,11 @@ func (r *mutationResolver) AddToCart(ctx context.Context, username string, cours
 	return r.Resolver.AddToCart(ctx, username, courseID)
 }
 
+// DeleteCartByID resolver para eliminar el carrito por su ID
+func (r *mutationResolver) DeleteCartByID(ctx context.Context, cartID string) (string, error) {
+	return r.Resolver.DeleteCartByID(ctx, cartID)
+}
+
 // RemoveFromCart is the resolver for the removeFromCart field.
 func (r *mutationResolver) RemoveFromCart(ctx context.Context, username string, courseID string) (*bool, error) {
 	success, err := r.Resolver.RemoveFromCart(ctx, username, courseID)
