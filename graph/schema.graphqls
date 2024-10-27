@@ -28,6 +28,7 @@ type Mutation {
 type Query {
     getUsuario(id: ID!): Usuario
     userByUsername(username: String!): Usuario
+    getAllUsers: [Usuario!]!
 }
 
 

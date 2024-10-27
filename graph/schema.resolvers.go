@@ -188,6 +188,11 @@ func (r *queryResolver) UserByUsername(ctx context.Context, username string) (*m
 	return &usuario, nil
 }
 
+// GetAllUsers es el resolver para el campo getAllUsers.
+func (r *queryResolver) GetAllUsers(ctx context.Context) ([]*model.Usuario, error) {
+	return r.Resolver.GetAllUsers(ctx)
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 

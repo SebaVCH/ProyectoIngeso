@@ -224,6 +224,18 @@ func (r *Resolver) ViewCartByUsername(ctx context.Context, username string) ([]*
 	return carrito, nil
 }
 
+// GetAllUsers devuelve todos los usuarios.
+func (r *Resolver) GetAllUsers(ctx context.Context) ([]*model.Usuario, error) {
+	var users []*model.Usuario
+
+	// Consultar todos los usuarios en la base de datos.
+	if err := r.DB.Find(&users).Error; err != nil {
+		return nil, fmt.Errorf("error al obtener los usuarios: %v", err)
+	}
+
+	return users, nil
+}
+
 // checkUserExists verifica si un usuario existe en la base de datos y devuelve su userID.
 func (r *Resolver) checkUserExists(username string) (string, error) {
 	var usuario model.Usuario
