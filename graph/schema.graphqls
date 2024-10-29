@@ -21,6 +21,7 @@ type Mutation {
     actualizarPassword(username: String!, oldPassword: String!, newPassword: String!): String
     addToCart(username: String!, courseID: String!): Carrito
     deleteCartByID(cartID: String!): String!
+    deleteCartByCourseID(courseID: String!): String!
     removeFromCart(username: String!, courseID: String!): Boolean
     viewCartByUsername(username: String!): [Carrito!]!
     viewCartByUserID(userID: String!): [Carrito!]!
