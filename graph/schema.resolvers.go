@@ -35,7 +35,7 @@ func (r *mutationResolver) RegisterUsuario(ctx context.Context, nameLastName str
 		return nil, errors.New("no se pudo registrar el usuario")
 	}
 
-	// 3. Crear el carrito asociado al usuario
+	/*// 3. Crear el carrito asociado al usuario
 	carrito := &models.Carrito{
 		CartID:   generateUniqueID(), // Genera un ID único para el carrito
 		UserID:   usuario.UserID,     // Relacionar el carrito con el usuario creado
@@ -44,7 +44,7 @@ func (r *mutationResolver) RegisterUsuario(ctx context.Context, nameLastName str
 
 	if err := r.DB.Create(carrito).Error; err != nil {
 		return nil, errors.New("no se pudo crear el carrito del usuario")
-	}
+	}*/
 
 	// 4. Convertir el modelo de usuario a modelo GraphQL
 	return &model.Usuario{

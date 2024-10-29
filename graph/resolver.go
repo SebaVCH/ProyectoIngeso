@@ -47,7 +47,7 @@ func (r *Resolver) RegistrarUsuario(ctx context.Context, input struct {
 		return nil, errors.New("error al crear el usuario")
 	}
 
-	// 3. Crear el carrito asociado al usuario recién creado
+	/*// 3. Crear el carrito asociado al usuario recién creado
 	carrito := models.Carrito{
 		CartID:   generateUniqueID(), // Genera un ID único para el carrito
 		UserID:   usuario.UserID,     // Asocia el carrito con el usuario
@@ -57,7 +57,7 @@ func (r *Resolver) RegistrarUsuario(ctx context.Context, input struct {
 	// Guardar el carrito en la base de datos
 	if err := r.DB.Create(&carrito).Error; err != nil {
 		return nil, errors.New("error al crear el carrito del usuario")
-	}
+	}*/
 
 	// 4. Retornar el usuario creado
 	return &usuario, nil
