@@ -25,6 +25,7 @@ type Mutation {
     removeFromCart(username: String!, courseID: String!): Boolean
     viewCartByUsername(username: String!): [Carrito!]!
     viewCartByUserID(userID: String!): [Carrito!]!
+    viewCartByEmail(email: String!): [Carrito!]!
     deleteUserByUsername(username: String!): String!
 }
 

@@ -168,6 +168,11 @@ func (r *mutationResolver) ViewCartByUserID(ctx context.Context, userID string) 
 	return r.Resolver.ViewCartByUserID(ctx, userID)
 }
 
+// ViewCartByEmail is the resolver for the viewCartByEmail field.
+func (r *mutationResolver) ViewCartByEmail(ctx context.Context, email string) ([]*model.Carrito, error) {
+	return r.Resolver.ViewCartByEmail(ctx, email)
+}
+
 // DeleteUserByUsername is the resolver for the deleteUserByUsername field.
 func (r *mutationResolver) DeleteUserByUsername(ctx context.Context, username string) (string, error) {
 	return r.Resolver.DeleteUserByUsername(ctx, username)

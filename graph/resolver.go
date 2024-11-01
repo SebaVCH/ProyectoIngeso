@@ -276,6 +276,23 @@ func (r *Resolver) ViewCartByUsername(ctx context.Context, username string) ([]*
 	return carrito, nil
 }
 
+// ViewCartByEmail permite ver el carrito del usuario utilizando el email.
+func (r *Resolver) ViewCartByEmail(ctx context.Context, email string) ([]*model.Carrito, error) {
+	// Buscar el usuario por su email y obtener el userID.
+	var usuario model.Usuario
+	if err := r.DB.Where("email = ?", email).First(&usuario).Error; err != nil {
+		return nil, fmt.Errorf("usuario no encontrado")
+	}
+
+	// Buscar todos los elementos del carrito asociados al userID.
+	var carrito []*model.Carrito
+	if err := r.DB.Where("user_id = ?", usuario.UserID).Find(&carrito).Error; err != nil {
+		return nil, fmt.Errorf("error al obtener el carrito: %v", err)
+	}
+
+	return carrito, nil
+}
+
 // GetAllUsers devuelve todos los usuarios.
 func (r *Resolver) GetAllUsers(ctx context.Context) ([]*model.Usuario, error) {
 	var users []*model.Usuario
