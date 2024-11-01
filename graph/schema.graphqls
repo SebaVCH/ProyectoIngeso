@@ -20,6 +20,7 @@ type Mutation {
     actualizarUsername(username: String!, newUsername: String!): Usuario
     actualizarPassword(username: String!, oldPassword: String!, newPassword: String!): String
     addToCart(username: String!, courseID: String!): Carrito
+    addToCartbyEmail(email: String!, courseID: String!): Carrito
     deleteCartByID(cartID: String!): String!
     deleteCartByCourseID(courseID: String!): String!
     removeFromCart(username: String!, courseID: String!): Boolean
@@ -27,6 +28,7 @@ type Mutation {
     viewCartByUserID(userID: String!): [Carrito!]!
     viewCartByEmail(email: String!): [Carrito!]!
     deleteUserByUsername(username: String!): String!
+   
 }
 
 type Query {

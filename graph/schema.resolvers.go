@@ -139,6 +139,11 @@ func (r *mutationResolver) AddToCart(ctx context.Context, username string, cours
 	return r.Resolver.AddToCart(ctx, username, courseID)
 }
 
+// AddToCartByEmail es el resolver para la mutación addToCartbyEmail
+func (r *mutationResolver) AddToCartbyEmail(ctx context.Context, email string, courseID string) (*model.Carrito, error) {
+	return r.Resolver.AddToCartbyEmail(ctx, email, courseID)
+}
+
 // DeleteCartByID resolver para eliminar el carrito por su ID
 func (r *mutationResolver) DeleteCartByID(ctx context.Context, cartID string) (string, error) {
 	return r.Resolver.DeleteCartByID(ctx, cartID)

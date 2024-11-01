@@ -57,6 +57,7 @@ type ComplexityRoot struct {
 		ActualizarPassword   func(childComplexity int, username string, oldPassword string, newPassword string) int
 		ActualizarUsername   func(childComplexity int, username string, newUsername string) int
 		AddToCart            func(childComplexity int, username string, courseID string) int
+		AddToCartbyEmail     func(childComplexity int, email string, courseID string) int
 		DeleteCartByCourseID func(childComplexity int, courseID string) int
 		DeleteCartByID       func(childComplexity int, cartID string) int
 		DeleteUserByUsername func(childComplexity int, username string) int
@@ -90,6 +91,7 @@ type MutationResolver interface {
 	ActualizarUsername(ctx context.Context, username string, newUsername string) (*model.Usuario, error)
 	ActualizarPassword(ctx context.Context, username string, oldPassword string, newPassword string) (*string, error)
 	AddToCart(ctx context.Context, username string, courseID string) (*model.Carrito, error)
+	AddToCartbyEmail(ctx context.Context, email string, courseID string) (*model.Carrito, error)
 	DeleteCartByID(ctx context.Context, cartID string) (string, error)
 	DeleteCartByCourseID(ctx context.Context, courseID string) (string, error)
 	RemoveFromCart(ctx context.Context, username string, courseID string) (*bool, error)
@@ -179,6 +181,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.AddToCart(childComplexity, args["username"].(string), args["courseID"].(string)), true
+
+	case "Mutation.addToCartbyEmail":
+		if e.complexity.Mutation.AddToCartbyEmail == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_addToCartbyEmail_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.AddToCartbyEmail(childComplexity, args["email"].(string), args["courseID"].(string)), true
 
 	case "Mutation.deleteCartByCourseID":
 		if e.complexity.Mutation.DeleteCartByCourseID == nil {
@@ -667,6 +681,65 @@ func (ec *executionContext) field_Mutation_addToCart_argsUsername(
 }
 
 func (ec *executionContext) field_Mutation_addToCart_argsCourseID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["courseID"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("courseID"))
+	if tmp, ok := rawArgs["courseID"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_addToCartbyEmail_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_addToCartbyEmail_argsEmail(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["email"] = arg0
+	arg1, err := ec.field_Mutation_addToCartbyEmail_argsCourseID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["courseID"] = arg1
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_addToCartbyEmail_argsEmail(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["email"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+	if tmp, ok := rawArgs["email"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_addToCartbyEmail_argsCourseID(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
@@ -1701,6 +1774,66 @@ func (ec *executionContext) fieldContext_Mutation_addToCart(ctx context.Context,
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_addToCart_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_addToCartbyEmail(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_addToCartbyEmail(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().AddToCartbyEmail(rctx, fc.Args["email"].(string), fc.Args["courseID"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.Carrito)
+	fc.Result = res
+	return ec.marshalOCarrito2ᚖProyectoIngesoᚋgraphᚋmodelᚐCarrito(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_addToCartbyEmail(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "cartID":
+				return ec.fieldContext_Carrito_cartID(ctx, field)
+			case "userID":
+				return ec.fieldContext_Carrito_userID(ctx, field)
+			case "courseID":
+				return ec.fieldContext_Carrito_courseID(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Carrito", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_addToCartbyEmail_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -4564,6 +4697,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "addToCart":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_addToCart(ctx, field)
+			})
+		case "addToCartbyEmail":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_addToCartbyEmail(ctx, field)
 			})
 		case "deleteCartByID":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {

@@ -9,10 +9,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/google/uuid"
-	"gorm.io/gorm"
 	"net/http"
 	"time"
+
+	"github.com/google/uuid"
+	"gorm.io/gorm"
 )
 
 type Resolver struct {
@@ -186,6 +187,43 @@ func (r *Resolver) AddToCart(ctx context.Context, username string, courseID stri
 	return cartItem, nil
 }
 
+// AddToCartByEmail agrega un curso al carrito del usuario utilizando el correo electrónico.
+func (r *Resolver) AddToCartbyEmail(ctx context.Context, email string, courseID string) (*model.Carrito, error) {
+	// Verificar si el usuario existe y obtener el userID mediante el email.
+	userID, err := r.checkUserExistsByEmail(email) // Debes implementar esta función
+	if err != nil {
+		return nil, fmt.Errorf("error al verificar el usuario: %v", err)
+	}
+
+	// Verificar si el curso existe en el servicio de cursos.
+	courseExists, err := r.checkCourseExists(courseID)
+	if err != nil {
+		return nil, fmt.Errorf("error al verificar el curso: %v", err)
+	}
+	if !courseExists {
+		return nil, fmt.Errorf("curso con ID %s no encontrado", courseID)
+	}
+
+	// Crear un nuevo elemento en el carrito.
+	cartItem := &model.Carrito{
+		CartID:   uuid.New().String(),
+		UserID:   userID, // Asegúrate de que esta variable no esté vacía.
+		CourseID: courseID,
+	}
+
+	// Verificar si el campo UserID no está vacío.
+	if cartItem.UserID == "" {
+		return nil, fmt.Errorf("userID no puede estar vacío")
+	}
+
+	// Guardar el elemento en la base de datos.
+	if err := r.DB.Create(cartItem).Error; err != nil {
+		return nil, err
+	}
+
+	return cartItem, nil
+}
+
 // DeleteCartByID elimina un carrito por su ID
 func (r *Resolver) DeleteCartByID(ctx context.Context, cartID string) (string, error) {
 	// Buscar el carrito por su ID
@@ -310,6 +348,13 @@ func (r *Resolver) checkUserExists(username string) (string, error) {
 	var usuario model.Usuario
 	if err := r.DB.Where("username = ?", username).First(&usuario).Error; err != nil {
 		return "", fmt.Errorf("usuario no encontrado")
+	}
+	return usuario.UserID, nil
+}
+func (r *Resolver) checkUserExistsByEmail(email string) (string, error) {
+	var usuario model.Usuario
+	if err := r.DB.Where("email = ?", email).First(&usuario).Error; err != nil {
+		return "", err
 	}
 	return usuario.UserID, nil
 }
