@@ -361,7 +361,7 @@ func (r *Resolver) checkUserExistsByEmail(email string) (string, error) {
 
 // checkCourseExists verifica si un curso existe en el servicio de cursos.
 func (r *Resolver) checkCourseExists(courseID string) (bool, error) {
-	url := "http://localhost:8081/graphql" // Asegúrate de que esta URL sea correcta.
+	url := "http://proyectoingesocursos:8081/graphql" // Asegúrate de que esta URL sea correcta.
 	query := fmt.Sprintf(`{"query": "query { cursoByID(courseID: \"%s\") { courseID } }"}`, courseID)
 
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer([]byte(query)))
