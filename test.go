@@ -34,6 +34,7 @@ func init() {
 		&models.Usuario{},
 		&models.Reseña{},
 		&model.Carrito{},
+		&models.UsuarioCurso{},
 		&models.Carrito{},
 		&models.Pago{},
 		&models.Notificación{},

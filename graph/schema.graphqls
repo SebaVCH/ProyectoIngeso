@@ -13,6 +13,12 @@ type Carrito {
     courseID: String!
 }
 
+type UsuarioCurso {
+    id: String!
+    userID: String!
+    courseID: String!
+}
+
 
 type Mutation {
     registerUsuario(nameLastName: String!, username: String!, email: String!, password: String!): Usuario
@@ -28,7 +34,8 @@ type Mutation {
     viewCartByUserID(userID: String!): [Carrito!]!
     viewCartByEmail(email: String!): [Carrito!]!
     deleteUserByUsername(username: String!): String!
-   
+    addCourseToUser(userID: String!, courseID: String!): String!
+    testAddCourseToUser(userID: String!, courseID: String!): String!
 }
 
 type Query {

@@ -22,3 +22,9 @@ type Usuario struct {
 	Password     string `json:"password"`
 	Role         string `json:"role"`
 }
+
+type UsuarioCurso struct {
+	ID       string `json:"id"`
+	UserID   string `json:"userID"`
+	CourseID string `json:"courseID"`
+}

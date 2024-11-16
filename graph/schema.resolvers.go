@@ -183,6 +183,16 @@ func (r *mutationResolver) DeleteUserByUsername(ctx context.Context, username st
 	return r.Resolver.DeleteUserByUsername(ctx, username)
 }
 
+// AddCourseToUser is the resolver for the addCourseToUser field.
+func (r *mutationResolver) AddCourseToUser(ctx context.Context, userID string, courseID string) (string, error) {
+	return r.Resolver.AddCourseToUser(ctx, userID, courseID)
+}
+
+// TestAddCourseToUser is the resolver for the testAddCourseToUser field.
+func (r *mutationResolver) TestAddCourseToUser(ctx context.Context, userID string, courseID string) (string, error) {
+	return r.Resolver.TestAddCourseToUser(ctx, userID, courseID)
+}
+
 // GetUsuario maneja la consulta para obtener un usuario por su ID.
 func (r *queryResolver) GetUsuario(ctx context.Context, id string) (*model.Usuario, error) {
 	var usuario models.Usuario
