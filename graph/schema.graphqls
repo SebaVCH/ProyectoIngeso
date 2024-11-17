@@ -15,7 +15,7 @@ type Carrito {
 
 type UsuarioCurso {
     id: String!
-    username: String!
+    email: String!
     courseID: String!
 }
 

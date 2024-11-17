@@ -87,8 +87,8 @@ type ComplexityRoot struct {
 
 	UsuarioCurso struct {
 		CourseID func(childComplexity int) int
+		Email    func(childComplexity int) int
 		ID       func(childComplexity int) int
-		Username func(childComplexity int) int
 	}
 }
 
@@ -402,19 +402,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UsuarioCurso.CourseID(childComplexity), true
 
+	case "UsuarioCurso.email":
+		if e.complexity.UsuarioCurso.Email == nil {
+			break
+		}
+
+		return e.complexity.UsuarioCurso.Email(childComplexity), true
+
 	case "UsuarioCurso.id":
 		if e.complexity.UsuarioCurso.ID == nil {
 			break
 		}
 
 		return e.complexity.UsuarioCurso.ID(childComplexity), true
-
-	case "UsuarioCurso.username":
-		if e.complexity.UsuarioCurso.Username == nil {
-			break
-		}
-
-		return e.complexity.UsuarioCurso.Username(childComplexity), true
 
 	}
 	return 0, false
@@ -3028,8 +3028,8 @@ func (ec *executionContext) fieldContext_UsuarioCurso_id(_ context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _UsuarioCurso_username(ctx context.Context, field graphql.CollectedField, obj *model.UsuarioCurso) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UsuarioCurso_username(ctx, field)
+func (ec *executionContext) _UsuarioCurso_email(ctx context.Context, field graphql.CollectedField, obj *model.UsuarioCurso) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UsuarioCurso_email(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3059,7 +3059,7 @@ func (ec *executionContext) _UsuarioCurso_username(ctx context.Context, field gr
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_UsuarioCurso_username(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_UsuarioCurso_email(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UsuarioCurso",
 		Field:      field,
@@ -5255,8 +5255,8 @@ func (ec *executionContext) _UsuarioCurso(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "username":
-			out.Values[i] = ec._UsuarioCurso_username(ctx, field, obj)
+		case "email":
+			out.Values[i] = ec._UsuarioCurso_email(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}

@@ -25,6 +25,6 @@ type Usuario struct {
 
 type UsuarioCurso struct {
 	ID       string `json:"id"`
-	Email string `json:"email"`
+	Email    string `json:"email"`
 	CourseID string `json:"courseID"`
 }
