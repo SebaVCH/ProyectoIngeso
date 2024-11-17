@@ -332,7 +332,7 @@ func (r *Resolver) ViewCartByEmail(ctx context.Context, email string) ([]*model.
 }
 
 // AddCourseToUser agrega un curso a la lista de cursos de un usuario por su ID.
-func (r *Resolver) AddCourseToUser(ctx context.Context, userID string, courseID string) (string, error) {
+func (r *Resolver) AddCourseToUser(ctx context.Context, username string, courseID string) (string, error) {
 	// Verificar si el curso existe usando la función `checkCourseExists`.
 	exists, err := r.checkCourseExists(courseID)
 	if err != nil {
@@ -344,20 +344,20 @@ func (r *Resolver) AddCourseToUser(ctx context.Context, userID string, courseID 
 
 	// Verificar si el usuario existe.
 	var usuario model.Usuario
-	if err := r.DB.Where("user_id = ?", userID).First(&usuario).Error; err != nil {
+	if err := r.DB.Where("username = ?", username).First(&usuario).Error; err != nil {
 		return "", fmt.Errorf("usuario no encontrado: %v", err)
 	}
 
 	// Verificar si la relación usuario-curso ya existe.
 	var relacion model.UsuarioCurso
-	if err := r.DB.Where("user_id = ? AND course_id = ?", userID, courseID).First(&relacion).Error; err == nil {
+	if err := r.DB.Where("username = ? AND course_id = ?", username, courseID).First(&relacion).Error; err == nil {
 		return "", fmt.Errorf("el usuario ya tiene este curso agregado")
 	}
 
 	// Crear la nueva relación usuario-curso.
 	nuevaRelacion := model.UsuarioCurso{
 		ID:       generateUniqueID(),
-		UserID:   userID,
+		Username: username,
 		CourseID: courseID,
 	}
 	if err := r.DB.Create(&nuevaRelacion).Error; err != nil {
@@ -430,16 +430,6 @@ func (r *Resolver) checkCourseExists(courseID string) (bool, error) {
 	}
 
 	return false, nil
-}
-
-// TestAddCourseToUser verifica la funcionalidad de AddCourseToUser.
-func (r *Resolver) TestAddCourseToUser(ctx context.Context, userID string, courseID string) (string, error) {
-	// Intentar agregar un curso al usuario
-	result, err := r.AddCourseToUser(ctx, userID, courseID)
-	if err != nil {
-		return "", fmt.Errorf("prueba fallida: %v", err)
-	}
-	return fmt.Sprintf("Prueba exitosa: %s", result), nil
 }
 
 func (r *queryResolver) UsuarioByUsername(ctx context.Context, username string) (*model.Usuario, error) {
