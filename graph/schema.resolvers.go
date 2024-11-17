@@ -223,6 +223,23 @@ func (r *queryResolver) GetAllUsers(ctx context.Context) ([]*model.Usuario, erro
 	return r.Resolver.GetAllUsers(ctx)
 }
 
+// GetCoursesByEmail is the resolver for the getCoursesByEmail field.
+func (r *queryResolver) GetCoursesByEmail(ctx context.Context, email string) ([]*model.UsuarioCurso, error) {
+	cursos, err := r.Resolver.GetCoursesByEmail(ctx, email)
+	if err != nil {
+		return nil, err
+	}
+
+	// Convertir los resultados a punteros para cumplir con el esquema GraphQL.
+	var result []*model.UsuarioCurso
+	for _, curso := range cursos {
+		cursoCopy := curso // Crear una copia para evitar referencias compartidas.
+		result = append(result, &cursoCopy)
+	}
+
+	return result, nil
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 
