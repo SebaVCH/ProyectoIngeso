@@ -15,9 +15,9 @@ import (
 
 // Definir la estructura que corresponde al mensaje recibido desde RabbitMQ
 type RabbitMQMessage struct {
-	Pattern string `json:"pattern"` // "get_user_id", "get_user_name", "get_cart_courses", "clear_user_cart"
+	Pattern string `json:"pattern"` // Ejemplo: "add_course_to_user"
 	Data    string `json:"data"`    // Email, userID, etc.
-	ID      string `json:"id"`
+	Extra   string `json:"extra"`   // Para datos adicionales como courseID
 }
 
 // Iniciar el consumidor de RabbitMQ desde main.go
@@ -30,13 +30,13 @@ func StartUserConsumer() error {
 	defer conn.Close()
 	defer ch.Close()
 
-	// Conectar a la base de datos
+	// Conectar a la base de datos SQLite
 	db, err := gorm.Open(sqlite.Open("base_datos.db"), &gorm.Config{})
 	if err != nil {
 		return fmt.Errorf("error connecting to database: %w", err)
 	}
 
-	// Declarar la cola para escuchar las solicitudes
+	// Declarar la cola para escuchar solicitudes
 	queueName := "users_queue"
 	q, err := ch.QueueDeclare(
 		queueName, // name
@@ -50,6 +50,7 @@ func StartUserConsumer() error {
 		return fmt.Errorf("failed to declare a queue: %w", err)
 	}
 
+	// Consumir mensajes de la cola
 	msgs, err := ch.Consume(
 		q.Name, // queue
 		"",     // consumer
@@ -63,6 +64,7 @@ func StartUserConsumer() error {
 		return fmt.Errorf("failed to register a consumer: %w", err)
 	}
 
+	// Manejar los mensajes recibidos
 	go func() {
 		for d := range msgs {
 			fmt.Printf("Mensaje recibido: %s\n", string(d.Body))
@@ -140,11 +142,62 @@ func StartUserConsumer() error {
 					continue
 				}
 
+			case "add_course_to_user":
+				// Manejar el caso de agregar curso
+				email := msg.Data
+				courseID := msg.Extra
+
+				if email == "" || courseID == "" {
+					log.Printf("Datos incompletos: email=%s, courseID=%s", email, courseID)
+					continue
+				}
+
+				// Verificar si el usuario existe
+				var usuario models.Usuario
+				result := db.Where("email = ?", email).First(&usuario)
+				if result.Error != nil {
+					log.Printf("No se encontró un usuario con el email %s: %s", email, result.Error)
+					continue
+				}
+
+				// Verificar si la relación ya existe
+				var usuarioCurso models.UsuarioCurso
+				check := db.Where("email = ? AND course_id = ?", email, courseID).First(&usuarioCurso)
+				if check.Error == nil {
+					log.Printf("El curso %s ya está asociado al usuario %s", courseID, email)
+					response := struct {
+						Message string `json:"message"`
+					}{Message: "El curso ya está asociado al usuario"}
+					responseBody, _ = json.Marshal(response)
+				} else {
+					// Crear la nueva relación
+					nuevoUsuarioCurso := models.UsuarioCurso{
+						ID:       utils.GenerateID(), // Genera un ID único
+						Email:    email,
+						CourseID: courseID,
+					}
+					if err := db.Create(&nuevoUsuarioCurso).Error; err != nil {
+						log.Printf("Error al asociar el curso %s con el usuario %s: %s", courseID, email, err)
+						continue
+					}
+
+					log.Printf("Curso %s asociado exitosamente al usuario %s", courseID, email)
+					response := struct {
+						Message string `json:"message"`
+					}{Message: "Curso agregado exitosamente"}
+					responseBody, err = json.Marshal(response)
+					if err != nil {
+						log.Printf("Error al serializar la respuesta: %s", err)
+						continue
+					}
+				}
+
 			default:
 				log.Printf("Patrón no soportado: %s", msg.Pattern)
 				continue
 			}
 
+			// Publicar la respuesta al cliente
 			err = ch.Publish(
 				"",        // exchange
 				d.ReplyTo, // routing key

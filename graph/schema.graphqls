@@ -34,7 +34,7 @@ type Mutation {
     viewCartByUserID(userID: String!): [Carrito!]!
     viewCartByEmail(email: String!): [Carrito!]!
     deleteUserByUsername(username: String!): String!
-    addCourseToUser(username: String!, courseID: String!): String!
+    addCourseToUser(email: String!, courseID: String!): String!
 }
 
 type Query {
