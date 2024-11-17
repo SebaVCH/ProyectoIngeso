@@ -2678,8 +2678,8 @@ func (ec *executionContext) fieldContext_Query_getCoursesByEmail(ctx context.Con
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_UsuarioCurso_id(ctx, field)
-			case "username":
-				return ec.fieldContext_UsuarioCurso_username(ctx, field)
+			case "email":
+				return ec.fieldContext_UsuarioCurso_email(ctx, field)
 			case "courseID":
 				return ec.fieldContext_UsuarioCurso_courseID(ctx, field)
 			}

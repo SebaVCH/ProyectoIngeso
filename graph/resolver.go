@@ -369,16 +369,10 @@ func (r *Resolver) AddCourseToUser(ctx context.Context, email string, courseID s
 
 // GetCoursesByEmail obtiene los cursos asociados a un usuario dado su email.
 func (r *Resolver) GetCoursesByEmail(ctx context.Context, email string) ([]model.UsuarioCurso, error) {
-	// Verificar si el usuario existe y obtener su username.
-	var usuario model.Usuario
-	if err := r.DB.Where("email = ?", email).First(&usuario).Error; err != nil {
-		return nil, fmt.Errorf("usuario no encontrado con el email %s: %v", email, err)
-	}
-
-	// Obtener los cursos del usuario utilizando su username.
+	// Verificar si existen cursos asociados al email proporcionado.
 	var cursos []model.UsuarioCurso
-	if err := r.DB.Where("username = ?", usuario.Username).Find(&cursos).Error; err != nil {
-		return nil, fmt.Errorf("error al obtener los cursos del usuario: %v", err)
+	if err := r.DB.Where("email = ?", email).Find(&cursos).Error; err != nil {
+		return nil, fmt.Errorf("error al obtener los cursos para el email %s: %v", email, err)
 	}
 
 	return cursos, nil
