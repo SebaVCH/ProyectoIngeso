@@ -56,7 +56,7 @@ type ComplexityRoot struct {
 	Mutation struct {
 		ActualizarPassword   func(childComplexity int, username string, oldPassword string, newPassword string) int
 		ActualizarUsername   func(childComplexity int, username string, newUsername string) int
-		AddCourseToUser      func(childComplexity int, username string, courseID string) int
+		AddCourseToUser      func(childComplexity int, email string, courseID string) int
 		AddToCart            func(childComplexity int, username string, courseID string) int
 		AddToCartbyEmail     func(childComplexity int, email string, courseID string) int
 		DeleteCartByCourseID func(childComplexity int, courseID string) int
@@ -88,8 +88,8 @@ type ComplexityRoot struct {
 
 	UsuarioCurso struct {
 		CourseID func(childComplexity int) int
+		Email    func(childComplexity int) int
 		ID       func(childComplexity int) int
-		Username func(childComplexity int) int
 	}
 }
 
@@ -107,7 +107,7 @@ type MutationResolver interface {
 	ViewCartByUserID(ctx context.Context, userID string) ([]*model.Carrito, error)
 	ViewCartByEmail(ctx context.Context, email string) ([]*model.Carrito, error)
 	DeleteUserByUsername(ctx context.Context, username string) (string, error)
-	AddCourseToUser(ctx context.Context, username string, courseID string) (string, error)
+	AddCourseToUser(ctx context.Context, email string, courseID string) (string, error)
 }
 type QueryResolver interface {
 	GetUsuario(ctx context.Context, id string) (*model.Usuario, error)
@@ -190,7 +190,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.AddCourseToUser(childComplexity, args["username"].(string), args["courseID"].(string)), true
+		return e.complexity.Mutation.AddCourseToUser(childComplexity, args["email"].(string), args["courseID"].(string)), true
 
 	case "Mutation.addToCart":
 		if e.complexity.Mutation.AddToCart == nil {
@@ -416,19 +416,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UsuarioCurso.CourseID(childComplexity), true
 
+	case "UsuarioCurso.email":
+		if e.complexity.UsuarioCurso.Email == nil {
+			break
+		}
+
+		return e.complexity.UsuarioCurso.Email(childComplexity), true
+
 	case "UsuarioCurso.id":
 		if e.complexity.UsuarioCurso.ID == nil {
 			break
 		}
 
 		return e.complexity.UsuarioCurso.ID(childComplexity), true
-
-	case "UsuarioCurso.username":
-		if e.complexity.UsuarioCurso.Username == nil {
-			break
-		}
-
-		return e.complexity.UsuarioCurso.Username(childComplexity), true
 
 	}
 	return 0, false
@@ -701,11 +701,11 @@ func (ec *executionContext) field_Mutation_actualizarUsername_argsNewUsername(
 func (ec *executionContext) field_Mutation_addCourseToUser_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Mutation_addCourseToUser_argsUsername(ctx, rawArgs)
+	arg0, err := ec.field_Mutation_addCourseToUser_argsEmail(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["username"] = arg0
+	args["email"] = arg0
 	arg1, err := ec.field_Mutation_addCourseToUser_argsCourseID(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -713,21 +713,21 @@ func (ec *executionContext) field_Mutation_addCourseToUser_args(ctx context.Cont
 	args["courseID"] = arg1
 	return args, nil
 }
-func (ec *executionContext) field_Mutation_addCourseToUser_argsUsername(
+func (ec *executionContext) field_Mutation_addCourseToUser_argsEmail(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
 	// even if the argument is null.
-	_, ok := rawArgs["username"]
+	_, ok := rawArgs["email"]
 	if !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
 
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("username"))
-	if tmp, ok := rawArgs["username"]; ok {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+	if tmp, ok := rawArgs["email"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -2406,7 +2406,7 @@ func (ec *executionContext) _Mutation_addCourseToUser(ctx context.Context, field
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().AddCourseToUser(rctx, fc.Args["username"].(string), fc.Args["courseID"].(string))
+		return ec.resolvers.Mutation().AddCourseToUser(rctx, fc.Args["email"].(string), fc.Args["courseID"].(string))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3137,8 +3137,8 @@ func (ec *executionContext) fieldContext_UsuarioCurso_id(_ context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _UsuarioCurso_username(ctx context.Context, field graphql.CollectedField, obj *model.UsuarioCurso) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_UsuarioCurso_username(ctx, field)
+func (ec *executionContext) _UsuarioCurso_email(ctx context.Context, field graphql.CollectedField, obj *model.UsuarioCurso) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_UsuarioCurso_email(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -3151,7 +3151,7 @@ func (ec *executionContext) _UsuarioCurso_username(ctx context.Context, field gr
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Username, nil
+		return obj.Email, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3168,7 +3168,7 @@ func (ec *executionContext) _UsuarioCurso_username(ctx context.Context, field gr
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_UsuarioCurso_username(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_UsuarioCurso_email(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "UsuarioCurso",
 		Field:      field,
@@ -5386,8 +5386,8 @@ func (ec *executionContext) _UsuarioCurso(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
-		case "username":
-			out.Values[i] = ec._UsuarioCurso_username(ctx, field, obj)
+		case "email":
+			out.Values[i] = ec._UsuarioCurso_email(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
