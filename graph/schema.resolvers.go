@@ -184,8 +184,8 @@ func (r *mutationResolver) DeleteUserByUsername(ctx context.Context, username st
 }
 
 // AddCourseToUser is the resolver for the addCourseToUser field.
-func (r *mutationResolver) AddCourseToUser(ctx context.Context, email string, courseID string) (string, error) {
-	return r.Resolver.AddCourseToUser(ctx, email, courseID)
+func (r *mutationResolver) AddCourseToUser(ctx context.Context, username string, courseID string) (string, error) {
+	return r.Resolver.AddCourseToUser(ctx, username, courseID)
 }
 
 // GetUsuario maneja la consulta para obtener un usuario por su ID.

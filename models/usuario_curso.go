@@ -2,7 +2,7 @@ package models
 
 type UsuarioCurso struct {
 	ID       string `gorm:"primaryKey;column:id;type:text;default:(hex(randomblob(16)))" json:"id"`
-	Email    string `gorm:"column:email;type:text" json:"email"`
+	Username string `gorm:"column:username;type:text" json:"username"`
 	CourseID string `gorm:"column:course_id;type:text" json:"courseID"`
 }
 

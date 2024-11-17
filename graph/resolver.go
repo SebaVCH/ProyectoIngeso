@@ -331,8 +331,8 @@ func (r *Resolver) ViewCartByEmail(ctx context.Context, email string) ([]*model.
 	return carrito, nil
 }
 
-// AddCourseToUser agrega un curso a la lista de cursos de un usuario por su email.
-func (r *Resolver) AddCourseToUser(ctx context.Context, email string, courseID string) (string, error) {
+// AddCourseToUser agrega un curso a la lista de cursos de un usuario por su ID.
+func (r *Resolver) AddCourseToUser(ctx context.Context, username string, courseID string) (string, error) {
 	// Verificar si el curso existe usando la función `checkCourseExists`.
 	exists, err := r.checkCourseExists(courseID)
 	if err != nil {
@@ -342,22 +342,22 @@ func (r *Resolver) AddCourseToUser(ctx context.Context, email string, courseID s
 		return "", fmt.Errorf("el curso con ID %s no existe", courseID)
 	}
 
-	// Verificar si el usuario existe en la base de datos.
+	// Verificar si el usuario existe.
 	var usuario model.Usuario
-	if err := r.DB.Where("email = ?", email).First(&usuario).Error; err != nil {
+	if err := r.DB.Where("username = ?", username).First(&usuario).Error; err != nil {
 		return "", fmt.Errorf("usuario no encontrado: %v", err)
 	}
 
-	// Verificar si la relación usuario-curso ya existe en la base de datos.
+	// Verificar si la relación usuario-curso ya existe.
 	var relacion model.UsuarioCurso
-	if err := r.DB.Where("email = ? AND course_id = ?", email, courseID).First(&relacion).Error; err == nil {
+	if err := r.DB.Where("username = ? AND course_id = ?", username, courseID).First(&relacion).Error; err == nil {
 		return "", fmt.Errorf("el usuario ya tiene este curso agregado")
 	}
 
 	// Crear la nueva relación usuario-curso.
 	nuevaRelacion := model.UsuarioCurso{
-		ID:       generateUniqueID(), // Genera un ID único para la relación.
-		Email:    email,
+		ID:       generateUniqueID(),
+		Username: username,
 		CourseID: courseID,
 	}
 	if err := r.DB.Create(&nuevaRelacion).Error; err != nil {

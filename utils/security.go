@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -16,8 +15,4 @@ func HashContrasena(contrasena string) (string, error) {
 func VerificarHashContrasena(contrasena, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(contrasena))
 	return err == nil
-}
-
-func GenerateID() string {
-	return uuid.New().String()
 }
