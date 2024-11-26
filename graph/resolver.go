@@ -190,7 +190,7 @@ func (r *Resolver) AddToCart(ctx context.Context, username string, courseID stri
 // AddToCartByEmail agrega un curso al carrito del usuario utilizando el correo electrónico.
 func (r *Resolver) AddToCartbyEmail(ctx context.Context, email string, courseID string) (*model.Carrito, error) {
 	// Verificar si el usuario existe y obtener el userID mediante el email.
-	userID, err := r.checkUserExistsByEmail(email) // Debes implementar esta función
+	userID, err := r.checkUserExistsByEmail(email)
 	if err != nil {
 		return nil, fmt.Errorf("error al verificar el usuario: %v", err)
 	}
@@ -204,10 +204,31 @@ func (r *Resolver) AddToCartbyEmail(ctx context.Context, email string, courseID 
 		return nil, fmt.Errorf("curso con ID %s no encontrado", courseID)
 	}
 
+	// Obtener los cursos del usuario mediante la consulta GetCoursesByEmail
+	userCourses, err := r.GetCoursesByEmail(ctx, email)
+	if err != nil {
+		return nil, fmt.Errorf("error al obtener los cursos del usuario: %v", err)
+	}
+
+	// Verificar si el curso ya está en la lista de cursos del usuario
+	for _, usuarioCurso := range userCourses {
+		if usuarioCurso.CourseID == courseID {
+			return nil, fmt.Errorf("el usuario ya tiene este curso en su lista de cursos")
+		}
+	}
+
+	// Verificar si el curso ya está en el carrito del usuario
+	existingCartItem := &model.Carrito{}
+	err = r.DB.Where("user_id = ? AND course_id = ?", userID, courseID).First(&existingCartItem).Error
+	if err == nil {
+		// Si se encuentra un item en el carrito, no lo agregamos de nuevo.
+		return nil, fmt.Errorf("el curso ya está en tu carrito")
+	}
+
 	// Crear un nuevo elemento en el carrito.
 	cartItem := &model.Carrito{
 		CartID:   uuid.New().String(),
-		UserID:   userID, // Asegúrate de que esta variable no esté vacía.
+		UserID:   userID,
 		CourseID: courseID,
 	}
 
@@ -223,6 +244,7 @@ func (r *Resolver) AddToCartbyEmail(ctx context.Context, email string, courseID 
 
 	return cartItem, nil
 }
+
 
 // DeleteCartByID elimina un carrito por su ID
 func (r *Resolver) DeleteCartByID(ctx context.Context, cartID string) (string, error) {
