@@ -47,6 +47,7 @@ type Query {
     userByUsername(username: String!): Usuario
     getAllUsers: [Usuario!]!
     getCoursesByEmail(email: String!): [UsuarioCurso!]!
+    obtenerUsernamePorEmail(email: String!): String
 }
 
 

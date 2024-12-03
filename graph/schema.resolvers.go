@@ -320,6 +320,15 @@ func (r *queryResolver) GetCoursesByEmail(ctx context.Context, email string) ([]
 	return result, nil
 }
 
+// ObtenerUsernamePorEmail is the resolver for the obtenerUsernamePorEmail field.
+func (r *queryResolver) ObtenerUsernamePorEmail(ctx context.Context, email string) (*string, error) {
+	var usuario models.Usuario
+	if err := r.DB.Where("email = ?", email).First(&usuario).Error; err != nil {
+		return nil, errors.New("usuario no encontrado")
+	}
+	return &usuario.Username, nil
+}
+
 // Mutation returns MutationResolver implementation.
 func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 

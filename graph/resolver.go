@@ -491,6 +491,19 @@ func (r *Resolver) GetCoursesByEmail(ctx context.Context, email string) ([]model
 	return cursos, nil
 }
 
+func (r *Resolver) ObtenerUsernamePorEmail(ctx context.Context, email string) (string, error) {
+    var usuario models.Usuario
+
+    // Buscar el usuario por el email
+    if err := r.DB.Where("email = ?", email).First(&usuario).Error; err != nil {
+        return "", errors.New("usuario no encontrado")
+    }
+
+    // Devolver el nombre de usuario
+    return usuario.Username, nil
+}
+
+
 // GetAllUsers devuelve todos los usuarios.
 func (r *Resolver) GetAllUsers(ctx context.Context) ([]*model.Usuario, error) {
 	var users []*model.Usuario
