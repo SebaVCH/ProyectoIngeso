@@ -25,6 +25,10 @@ type Mutation {
     loginUsuario(identificador: String!, password: String!): String
     actualizarUsername(username: String!, newUsername: String!): Usuario
     actualizarPassword(username: String!, oldPassword: String!, newPassword: String!): String
+    actualizarUsernameConEmail(email: String!, newUsername: String!): Usuario!
+    actualizarNombreCompleto(email: String!, newNameLastName: String!): Usuario!
+    actualizarEmail(email: String!, newEmail: String!): Usuario!
+    actualizarContrasena(email: String!, oldPassword: String!, newPassword: String!): String
     addToCart(username: String!, courseID: String!): Carrito
     addToCartbyEmail(email: String!, courseID: String!): Carrito
     deleteCartByID(cartID: String!): String!

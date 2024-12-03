@@ -133,6 +133,98 @@ func (r *Resolver) UpdatePassword(ctx context.Context, username string, oldPassw
 	return "Contraseña actualizada exitosamente", nil
 }
 
+func (r *Resolver) ActualizarUsernameConEmail(ctx context.Context, email string, newUsername string) (*models.Usuario, error) {
+	var usuario models.Usuario
+
+	// Buscar el usuario por su email
+	if err := r.DB.Where("email = ?", email).First(&usuario).Error; err != nil {
+		return nil, errors.New("usuario no encontrado")
+	}
+
+	// Verificar si el nuevo username ya está en uso
+	var existingUser models.Usuario
+	if err := r.DB.Where("username = ?", newUsername).First(&existingUser).Error; err == nil {
+		return nil, errors.New("el nombre de usuario ya está en uso")
+	}
+
+	// Actualizar el username
+	usuario.Username = newUsername
+	if err := r.DB.Save(&usuario).Error; err != nil {
+		return nil, errors.New("no se pudo actualizar el nombre de usuario")
+	}
+
+	return &usuario, nil
+}
+
+func (r *Resolver) ActualizarNombreCompleto(ctx context.Context, email string, newNameLastName string) (*models.Usuario, error) {
+	var usuario models.Usuario
+
+	// Buscar el usuario por su email
+	if err := r.DB.Where("email = ?", email).First(&usuario).Error; err != nil {
+		return nil, errors.New("usuario no encontrado")
+	}
+
+	// Actualizar el nombre completo
+	usuario.NameLastName = newNameLastName
+	if err := r.DB.Save(&usuario).Error; err != nil {
+		return nil, errors.New("no se pudo actualizar el nombre completo")
+	}
+
+	return &usuario, nil
+}
+
+func (r *Resolver) ActualizarEmail(ctx context.Context, email string, newEmail string) (*models.Usuario, error) {
+	var usuario models.Usuario
+
+	// Buscar el usuario por su email actual
+	if err := r.DB.Where("email = ?", email).First(&usuario).Error; err != nil {
+		return nil, errors.New("usuario no encontrado")
+	}
+
+	// Verificar si el nuevo email ya está en uso
+	var existingUser models.Usuario
+	if err := r.DB.Where("email = ?", newEmail).First(&existingUser).Error; err == nil {
+		return nil, errors.New("el email ya está en uso")
+	}
+
+	// Actualizar el email
+	usuario.Email = newEmail
+	if err := r.DB.Save(&usuario).Error; err != nil {
+		return nil, errors.New("no se pudo actualizar el email")
+	}
+
+	return &usuario, nil
+}
+func (r *Resolver) ActualizarContrasena(ctx context.Context, email string, oldPassword string, newPassword string) (string, error) {
+	var usuario models.Usuario
+
+	// Buscar el usuario por el email
+	if err := r.DB.Where("email = ?", email).First(&usuario).Error; err != nil {
+		return "", errors.New("usuario no encontrado")
+	}
+
+	// Verificar que la contraseña actual sea correcta
+	if !utils.VerificarHashContrasena(oldPassword, usuario.Password) {
+		return "", errors.New("la contraseña actual es incorrecta")
+	}
+
+	// Cifrar la nueva contraseña
+	newHashedPassword, err := utils.HashContrasena(newPassword)
+	if err != nil {
+		return "", errors.New("error al cifrar la nueva contraseña")
+	}
+
+	// Actualizar la contraseña
+	usuario.Password = newHashedPassword
+
+	// Guardar los cambios
+	if err := r.DB.Save(&usuario).Error; err != nil {
+		return "", errors.New("no se pudo actualizar la contraseña")
+	}
+
+	return "Contraseña actualizada exitosamente", nil
+}
+
 // DeleteUserByUsername - elimina un usuario por su nombre de usuario
 func (r *Resolver) DeleteUserByUsername(ctx context.Context, username string) (string, error) {
 	var usuario models.Usuario
@@ -244,7 +336,6 @@ func (r *Resolver) AddToCartbyEmail(ctx context.Context, email string, courseID 
 
 	return cartItem, nil
 }
-
 
 // DeleteCartByID elimina un carrito por su ID
 func (r *Resolver) DeleteCartByID(ctx context.Context, cartID string) (string, error) {

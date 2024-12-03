@@ -54,20 +54,24 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		ActualizarPassword   func(childComplexity int, username string, oldPassword string, newPassword string) int
-		ActualizarUsername   func(childComplexity int, username string, newUsername string) int
-		AddCourseToUser      func(childComplexity int, email string, courseID string) int
-		AddToCart            func(childComplexity int, username string, courseID string) int
-		AddToCartbyEmail     func(childComplexity int, email string, courseID string) int
-		DeleteCartByCourseID func(childComplexity int, courseID string) int
-		DeleteCartByID       func(childComplexity int, cartID string) int
-		DeleteUserByUsername func(childComplexity int, username string) int
-		LoginUsuario         func(childComplexity int, identificador string, password string) int
-		RegisterUsuario      func(childComplexity int, nameLastName string, username string, email string, password string) int
-		RemoveFromCart       func(childComplexity int, username string, courseID string) int
-		ViewCartByEmail      func(childComplexity int, email string) int
-		ViewCartByUserID     func(childComplexity int, userID string) int
-		ViewCartByUsername   func(childComplexity int, username string) int
+		ActualizarContrasena       func(childComplexity int, email string, oldPassword string, newPassword string) int
+		ActualizarEmail            func(childComplexity int, email string, newEmail string) int
+		ActualizarNombreCompleto   func(childComplexity int, email string, newNameLastName string) int
+		ActualizarPassword         func(childComplexity int, username string, oldPassword string, newPassword string) int
+		ActualizarUsername         func(childComplexity int, username string, newUsername string) int
+		ActualizarUsernameConEmail func(childComplexity int, email string, newUsername string) int
+		AddCourseToUser            func(childComplexity int, email string, courseID string) int
+		AddToCart                  func(childComplexity int, username string, courseID string) int
+		AddToCartbyEmail           func(childComplexity int, email string, courseID string) int
+		DeleteCartByCourseID       func(childComplexity int, courseID string) int
+		DeleteCartByID             func(childComplexity int, cartID string) int
+		DeleteUserByUsername       func(childComplexity int, username string) int
+		LoginUsuario               func(childComplexity int, identificador string, password string) int
+		RegisterUsuario            func(childComplexity int, nameLastName string, username string, email string, password string) int
+		RemoveFromCart             func(childComplexity int, username string, courseID string) int
+		ViewCartByEmail            func(childComplexity int, email string) int
+		ViewCartByUserID           func(childComplexity int, userID string) int
+		ViewCartByUsername         func(childComplexity int, username string) int
 	}
 
 	Query struct {
@@ -98,6 +102,10 @@ type MutationResolver interface {
 	LoginUsuario(ctx context.Context, identificador string, password string) (*string, error)
 	ActualizarUsername(ctx context.Context, username string, newUsername string) (*model.Usuario, error)
 	ActualizarPassword(ctx context.Context, username string, oldPassword string, newPassword string) (*string, error)
+	ActualizarUsernameConEmail(ctx context.Context, email string, newUsername string) (*model.Usuario, error)
+	ActualizarNombreCompleto(ctx context.Context, email string, newNameLastName string) (*model.Usuario, error)
+	ActualizarEmail(ctx context.Context, email string, newEmail string) (*model.Usuario, error)
+	ActualizarContrasena(ctx context.Context, email string, oldPassword string, newPassword string) (*string, error)
 	AddToCart(ctx context.Context, username string, courseID string) (*model.Carrito, error)
 	AddToCartbyEmail(ctx context.Context, email string, courseID string) (*model.Carrito, error)
 	DeleteCartByID(ctx context.Context, cartID string) (string, error)
@@ -156,6 +164,42 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Carrito.UserID(childComplexity), true
 
+	case "Mutation.actualizarContrasena":
+		if e.complexity.Mutation.ActualizarContrasena == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_actualizarContrasena_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ActualizarContrasena(childComplexity, args["email"].(string), args["oldPassword"].(string), args["newPassword"].(string)), true
+
+	case "Mutation.actualizarEmail":
+		if e.complexity.Mutation.ActualizarEmail == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_actualizarEmail_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ActualizarEmail(childComplexity, args["email"].(string), args["newEmail"].(string)), true
+
+	case "Mutation.actualizarNombreCompleto":
+		if e.complexity.Mutation.ActualizarNombreCompleto == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_actualizarNombreCompleto_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ActualizarNombreCompleto(childComplexity, args["email"].(string), args["newNameLastName"].(string)), true
+
 	case "Mutation.actualizarPassword":
 		if e.complexity.Mutation.ActualizarPassword == nil {
 			break
@@ -179,6 +223,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.ActualizarUsername(childComplexity, args["username"].(string), args["newUsername"].(string)), true
+
+	case "Mutation.actualizarUsernameConEmail":
+		if e.complexity.Mutation.ActualizarUsernameConEmail == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_actualizarUsernameConEmail_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.ActualizarUsernameConEmail(childComplexity, args["email"].(string), args["newUsername"].(string)), true
 
 	case "Mutation.addCourseToUser":
 		if e.complexity.Mutation.AddCourseToUser == nil {
@@ -553,6 +609,210 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Mutation_actualizarContrasena_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_actualizarContrasena_argsEmail(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["email"] = arg0
+	arg1, err := ec.field_Mutation_actualizarContrasena_argsOldPassword(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["oldPassword"] = arg1
+	arg2, err := ec.field_Mutation_actualizarContrasena_argsNewPassword(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["newPassword"] = arg2
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_actualizarContrasena_argsEmail(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["email"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+	if tmp, ok := rawArgs["email"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_actualizarContrasena_argsOldPassword(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["oldPassword"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("oldPassword"))
+	if tmp, ok := rawArgs["oldPassword"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_actualizarContrasena_argsNewPassword(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["newPassword"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("newPassword"))
+	if tmp, ok := rawArgs["newPassword"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_actualizarEmail_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_actualizarEmail_argsEmail(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["email"] = arg0
+	arg1, err := ec.field_Mutation_actualizarEmail_argsNewEmail(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["newEmail"] = arg1
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_actualizarEmail_argsEmail(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["email"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+	if tmp, ok := rawArgs["email"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_actualizarEmail_argsNewEmail(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["newEmail"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("newEmail"))
+	if tmp, ok := rawArgs["newEmail"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_actualizarNombreCompleto_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_actualizarNombreCompleto_argsEmail(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["email"] = arg0
+	arg1, err := ec.field_Mutation_actualizarNombreCompleto_argsNewNameLastName(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["newNameLastName"] = arg1
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_actualizarNombreCompleto_argsEmail(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["email"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+	if tmp, ok := rawArgs["email"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_actualizarNombreCompleto_argsNewNameLastName(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["newNameLastName"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("newNameLastName"))
+	if tmp, ok := rawArgs["newNameLastName"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
 func (ec *executionContext) field_Mutation_actualizarPassword_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -632,6 +892,65 @@ func (ec *executionContext) field_Mutation_actualizarPassword_argsNewPassword(
 
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("newPassword"))
 	if tmp, ok := rawArgs["newPassword"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_actualizarUsernameConEmail_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Mutation_actualizarUsernameConEmail_argsEmail(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["email"] = arg0
+	arg1, err := ec.field_Mutation_actualizarUsernameConEmail_argsNewUsername(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["newUsername"] = arg1
+	return args, nil
+}
+func (ec *executionContext) field_Mutation_actualizarUsernameConEmail_argsEmail(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["email"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("email"))
+	if tmp, ok := rawArgs["email"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Mutation_actualizarUsernameConEmail_argsNewUsername(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["newUsername"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("newUsername"))
+	if tmp, ok := rawArgs["newUsername"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
 	}
 
@@ -1860,6 +2179,265 @@ func (ec *executionContext) fieldContext_Mutation_actualizarPassword(ctx context
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_actualizarPassword_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_actualizarUsernameConEmail(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_actualizarUsernameConEmail(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ActualizarUsernameConEmail(rctx, fc.Args["email"].(string), fc.Args["newUsername"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Usuario)
+	fc.Result = res
+	return ec.marshalNUsuario2ᚖProyectoIngesoᚋgraphᚋmodelᚐUsuario(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_actualizarUsernameConEmail(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "userID":
+				return ec.fieldContext_Usuario_userID(ctx, field)
+			case "nameLastName":
+				return ec.fieldContext_Usuario_nameLastName(ctx, field)
+			case "username":
+				return ec.fieldContext_Usuario_username(ctx, field)
+			case "email":
+				return ec.fieldContext_Usuario_email(ctx, field)
+			case "password":
+				return ec.fieldContext_Usuario_password(ctx, field)
+			case "role":
+				return ec.fieldContext_Usuario_role(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Usuario", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_actualizarUsernameConEmail_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_actualizarNombreCompleto(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_actualizarNombreCompleto(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ActualizarNombreCompleto(rctx, fc.Args["email"].(string), fc.Args["newNameLastName"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Usuario)
+	fc.Result = res
+	return ec.marshalNUsuario2ᚖProyectoIngesoᚋgraphᚋmodelᚐUsuario(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_actualizarNombreCompleto(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "userID":
+				return ec.fieldContext_Usuario_userID(ctx, field)
+			case "nameLastName":
+				return ec.fieldContext_Usuario_nameLastName(ctx, field)
+			case "username":
+				return ec.fieldContext_Usuario_username(ctx, field)
+			case "email":
+				return ec.fieldContext_Usuario_email(ctx, field)
+			case "password":
+				return ec.fieldContext_Usuario_password(ctx, field)
+			case "role":
+				return ec.fieldContext_Usuario_role(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Usuario", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_actualizarNombreCompleto_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_actualizarEmail(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_actualizarEmail(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ActualizarEmail(rctx, fc.Args["email"].(string), fc.Args["newEmail"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(*model.Usuario)
+	fc.Result = res
+	return ec.marshalNUsuario2ᚖProyectoIngesoᚋgraphᚋmodelᚐUsuario(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_actualizarEmail(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "userID":
+				return ec.fieldContext_Usuario_userID(ctx, field)
+			case "nameLastName":
+				return ec.fieldContext_Usuario_nameLastName(ctx, field)
+			case "username":
+				return ec.fieldContext_Usuario_username(ctx, field)
+			case "email":
+				return ec.fieldContext_Usuario_email(ctx, field)
+			case "password":
+				return ec.fieldContext_Usuario_password(ctx, field)
+			case "role":
+				return ec.fieldContext_Usuario_role(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Usuario", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_actualizarEmail_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_actualizarContrasena(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Mutation_actualizarContrasena(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().ActualizarContrasena(rctx, fc.Args["email"].(string), fc.Args["oldPassword"].(string), fc.Args["newPassword"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Mutation_actualizarContrasena(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_actualizarContrasena_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -5090,6 +5668,31 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_actualizarPassword(ctx, field)
 			})
+		case "actualizarUsernameConEmail":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_actualizarUsernameConEmail(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "actualizarNombreCompleto":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_actualizarNombreCompleto(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "actualizarEmail":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_actualizarEmail(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "actualizarContrasena":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_actualizarContrasena(ctx, field)
+			})
 		case "addToCart":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_addToCart(ctx, field)
@@ -5842,6 +6445,10 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNUsuario2ProyectoIngesoᚋgraphᚋmodelᚐUsuario(ctx context.Context, sel ast.SelectionSet, v model.Usuario) graphql.Marshaler {
+	return ec._Usuario(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNUsuario2ᚕᚖProyectoIngesoᚋgraphᚋmodelᚐUsuarioᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Usuario) graphql.Marshaler {

@@ -134,6 +134,86 @@ func (r *mutationResolver) ActualizarPassword(ctx context.Context, username stri
 	return &successMsg, nil
 }
 
+// ActualizarUsernameConEmail is the resolver for the actualizarUsernameConEmail field.
+func (r *mutationResolver) ActualizarUsernameConEmail(ctx context.Context, email string, newUsername string) (*model.Usuario, error) {
+	usuario, err := r.Resolver.ActualizarUsernameConEmail(ctx, email, newUsername)
+	if err != nil {
+		return nil, err
+	}
+	return &model.Usuario{
+		UserID:       usuario.UserID,
+		NameLastName: usuario.NameLastName,
+		Username:     usuario.Username,
+		Email:        usuario.Email,
+		Password:     usuario.Password,
+		Role:         usuario.Role,
+	}, nil
+}
+
+// ActualizarNombreCompleto is the resolver for the actualizarNombreCompleto field.
+func (r *mutationResolver) ActualizarNombreCompleto(ctx context.Context, email string, newNameLastName string) (*model.Usuario, error) {
+	usuario, err := r.Resolver.ActualizarNombreCompleto(ctx, email, newNameLastName)
+	if err != nil {
+		return nil, err
+	}
+	return &model.Usuario{
+		UserID:       usuario.UserID,
+		NameLastName: usuario.NameLastName,
+		Username:     usuario.Username,
+		Email:        usuario.Email,
+		Password:     usuario.Password,
+		Role:         usuario.Role,
+	}, nil
+}
+
+// ActualizarEmail is the resolver for the actualizarEmail field.
+func (r *mutationResolver) ActualizarEmail(ctx context.Context, email string, newEmail string) (*model.Usuario, error) {
+	usuario, err := r.Resolver.ActualizarEmail(ctx, email, newEmail)
+	if err != nil {
+		return nil, err
+	}
+	return &model.Usuario{
+		UserID:       usuario.UserID,
+		NameLastName: usuario.NameLastName,
+		Username:     usuario.Username,
+		Email:        usuario.Email,
+		Password:     usuario.Password,
+		Role:         usuario.Role,
+	}, nil
+}
+
+// ActualizarContrasena is the resolver for the actualizarContrasena field.
+func (r *mutationResolver) ActualizarContrasena(ctx context.Context, email string, oldPassword string, newPassword string) (*string, error) {
+	var usuario models.Usuario
+
+	// Buscar el usuario por el nombre de usuario
+	if err := r.DB.Where("email = ?", email).First(&usuario).Error; err != nil {
+		return nil, errors.New("usuario no encontrado")
+	}
+
+	// Verificar que la contraseña actual sea correcta
+	if !utils.VerificarHashContrasena(oldPassword, usuario.Password) {
+		return nil, errors.New("la contraseña actual es incorrecta")
+	}
+
+	// Cifrar la nueva contraseña
+	newHashedPassword, err := utils.HashContrasena(newPassword)
+	if err != nil {
+		return nil, errors.New("error al cifrar la nueva contraseña")
+	}
+
+	// Actualizar la contraseña
+	usuario.Password = newHashedPassword
+
+	// Guardar los cambios
+	if err := r.DB.Save(&usuario).Error; err != nil {
+		return nil, errors.New("no se pudo actualizar la contraseña")
+	}
+
+	successMsg := "Contraseña actualizada exitosamente"
+	return &successMsg, nil
+}
+
 // AddToCart is the resolver for the addToCart field.
 func (r *mutationResolver) AddToCart(ctx context.Context, username string, courseID string) (*model.Carrito, error) {
 	return r.Resolver.AddToCart(ctx, username, courseID)
